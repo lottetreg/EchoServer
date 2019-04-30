@@ -1,5 +1,10 @@
 plugins {
     id 'java'
+    id 'application'
+}
+
+application {
+    mainClassName = 'io.github.lottetreg.echo.EchoServer'
 }
 
 version '1.0-SNAPSHOT'
