@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 
 public class EchoServer {
   public static void main(String[] args) {
-    int portNumber = Integer.parseInt(args[0]);
+    int portNumber = new ArgumentParser().parse(args);
     try {
       ServerSocket serverSocket = new ServerSocket(portNumber);
       System.out.println("Waiting for connection");
