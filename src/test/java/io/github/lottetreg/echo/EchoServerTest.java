@@ -8,10 +8,14 @@ import java.net.Socket;
 public class EchoServerTest {
   int portNumber = 8080;
 
+  @Test
   public void itWorks() throws IOException {
     Thread serverHandlerThread = new ServerHandlerThread();
     serverHandlerThread.start();
-    new Socket("0.0.0.0", portNumber);
+
+    Socket socket = new Socket("0.0.0.0", portNumber);
+
+    socket.close();
   }
 
   class ServerHandlerThread extends Thread {

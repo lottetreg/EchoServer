@@ -1,17 +1,11 @@
 package io.github.lottetreg.echo;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Connection {
-  ServerSocket socket;
+  public Socket socket;
 
-  Connection(ServerSocket socket) {
+  Connection(Socket socket) {
     this.socket = socket;
-  }
-
-  public Socket accept() throws IOException {
-    return socket.accept();
   }
 }
