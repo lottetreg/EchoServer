@@ -33,7 +33,7 @@ public class Socket {
     try {
       java.net.Socket socket = this.serverSocket.accept();
       System.out.println("Connection accepted on port " + this.serverSocket.getLocalPort());
-      return new Connection(socket);
+      return new Connection();
     } catch (IOException e) {
       System.out.println(e.getStackTrace());
       return null;

@@ -20,7 +20,7 @@ public class ServerTest {
     }
 
     public Connection acceptConnection() {
-      return new Connection(new java.net.Socket());
+      return new Connection();
     }
   }
 

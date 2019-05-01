@@ -1,6 +1,8 @@
 package io.github.lottetreg.echo;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.instanceOf;
 
 import org.junit.Test;
 
@@ -24,9 +26,18 @@ public class ConnectionTest {
   }
 
   @Test
-  public void itIsInitializedWithASocket() {
+  public void itCreatesANewSocket() {
+    Connection connection = new Connection();
+
+    assertThat(connection.socket, instanceOf(Socket.class));
+  }
+
+  @Test
+  public void testSetSocket() {
     Socket socket = new Socket();
-    Connection connection = new Connection(socket);
+    Connection connection = new Connection();
+
+    connection.setSocket(socket);
 
     assertEquals(socket, connection.socket);
   }
@@ -34,7 +45,8 @@ public class ConnectionTest {
   @Test
   public void testGetInputStream() throws IOException {
     Socket socket = new MockSocket();
-    Connection connection = new Connection(socket);
+    Connection connection = new Connection();
+    connection.setSocket(socket);
 
     InputStream inputStream = connection.getInputStream();
 

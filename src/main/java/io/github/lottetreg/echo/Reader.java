@@ -10,7 +10,7 @@ public class Reader {
   public Connection connection;
 
   Reader() {
-    this.connection = new Connection(new Socket());
+    this.connection = new Connection();
   }
 
   public void setConnection(Connection connection) {

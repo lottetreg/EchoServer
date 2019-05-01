@@ -33,7 +33,7 @@ public class ReaderTest {
 
   @Test
   public void testSetConnection() {
-    Connection connection = new Connection(new Socket());
+    Connection connection = new Connection();
 
     reader.setConnection(connection);
 
@@ -43,8 +43,8 @@ public class ReaderTest {
   @Test
   public void testReadLine() {
     // better to mock the socket or the connection instead?
-    Socket mockSocket = new MockSocket();
-    Connection connection = new Connection(mockSocket);
+    Connection connection = new Connection();
+    connection.setSocket(new MockSocket());
     reader.setConnection(connection);
 
     assertEquals(reader.readLine(), "Some string");

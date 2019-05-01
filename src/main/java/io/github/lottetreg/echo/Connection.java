@@ -2,11 +2,16 @@ package io.github.lottetreg.echo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Socket;
 
 public class Connection {
-  public java.net.Socket socket;
+  public Socket socket;
 
-  Connection(java.net.Socket socket) {
+  Connection() {
+    this.socket = new Socket();
+  }
+
+  public void setSocket(Socket socket) {
     this.socket = socket;
   }
 
