@@ -3,18 +3,22 @@ package io.github.lottetreg.echo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
+@RunWith(Enclosed.class)
 public class ServerTest {
-  private ByteArrayOutputStream bytes;
-  private Server server;
+  private static ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+  private static Output out = new Output(new PrintStream(bytes));
 
-  private class MockSocket extends Socket {
+  private static class MockSocket extends Socket {
     MockSocket() {
       super();
     }
@@ -24,32 +28,45 @@ public class ServerTest {
     }
   }
 
-  @Before
-  public void setUp() {
-    bytes = new ByteArrayOutputStream();
-    Output out = new Output(new PrintStream(bytes));
+  public static class SetUpTests {
+    @Test
+    public void testItCreatesANewSocket () {
+      assertThat(new Server(out).socket, instanceOf(Socket.class));
+    }
 
-    Socket mockSocket = new MockSocket();
-    server = new Server(out);
-    server.setSocket(mockSocket);
+    @Test
+    public void testItCreatesANewConnection () {
+      assertThat(new Server(out).connection, instanceOf(Connection.class));
+    }
   }
 
-  @After
-  public void tearDown() {
-    server.socket.close();
-  }
+  public static class OutputTests {
+    private Server server;
 
-  @Test
-  public void testWritesWaitingForConnectionMessage() {
-    server.start(9000);
+    @Before
+    public void setUp() {
+      Socket mockSocket = new MockSocket();
+      server = new Server(out);
+      server.setSocket(mockSocket);
+    }
 
-    assertThat(bytes.toString(), containsString("Waiting for connection"));
-  }
+    @After
+    public void tearDown() {
+      server.socket.close();
+    }
 
-  @Test
-  public void testWritesConnectionAcceptedMessage() {
-    server.start(9000);
+    @Test
+    public void testWritesWaitingForConnectionMessage() {
+      server.start(9000);
 
-    assertThat(bytes.toString(), containsString("Connection accepted"));
+      assertThat(bytes.toString(), containsString("Waiting for connection"));
+    }
+
+    @Test
+    public void testWritesConnectionAcceptedMessage() {
+      server.start(9000);
+
+      assertThat(bytes.toString(), containsString("Connection accepted"));
+    }
   }
 }
