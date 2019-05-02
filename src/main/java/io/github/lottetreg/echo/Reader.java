@@ -9,7 +9,7 @@ public class Reader {
   public Connection connection;
 
   Reader() {
-    this.connection = new Connection();
+    this.connection = new Connection.Builder().build();
   }
 
   public void setConnection(Connection connection) {

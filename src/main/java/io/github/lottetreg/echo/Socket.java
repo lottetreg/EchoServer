@@ -11,6 +11,7 @@ public class Socket {
     try {
       this.serverSocket = new ServerSocket();
     } catch (IOException e) {
+      System.out.println(e);
       this.serverSocket = null;
     }
   }
@@ -25,16 +26,17 @@ public class Socket {
     try {
       this.serverSocket.bind(socketAddress);
     } catch (IOException e) {
-      System.out.println(e.getStackTrace());
+      System.out.println(e);
     }
   }
 
-  public void acceptConnection(Connection connection) {
+  public Connection acceptConnection() {
     try {
       java.net.Socket socket = this.serverSocket.accept();
-      connection.setSocket(socket);
+      return new Connection.Builder().setSocket(socket).build();
     } catch (IOException e) {
-      System.out.println(e.getStackTrace());
+      System.out.println(e);
+      return null;
     }
   }
 
@@ -42,7 +44,7 @@ public class Socket {
     try {
       this.serverSocket.close();
     } catch (IOException e) {
-      System.out.println(e.getStackTrace());
+      System.out.println(e);
     }
   }
 }
