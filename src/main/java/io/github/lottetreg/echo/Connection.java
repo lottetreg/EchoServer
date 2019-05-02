@@ -1,11 +1,9 @@
 package io.github.lottetreg.echo;
 
-import java.net.Socket;
-
 public class Connection {
-  public Socket socket;
+  public java.net.Socket socket;
 
-  Connection(Socket socket) {
+  Connection(java.net.Socket socket) {
     this.socket = socket;
   }
 }
