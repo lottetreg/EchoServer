@@ -20,7 +20,7 @@ public class Socket {
   }
 
   public void setPort(int portNumber) {
-    String hostname = "0.0.0.0";
+    String hostname = "127.0.0.1";
     InetSocketAddress socketAddress = new InetSocketAddress(hostname, portNumber);
     try {
       this.serverSocket.bind(socketAddress);
@@ -29,14 +29,13 @@ public class Socket {
     }
   }
 
-  public Connection acceptConnection() {
+  public void acceptConnection(Connection connection) {
     try {
       java.net.Socket socket = this.serverSocket.accept();
       System.out.println("Connection accepted on port " + this.serverSocket.getLocalPort());
-      return new Connection();
+      connection.setSocket(socket);
     } catch (IOException e) {
       System.out.println(e.getStackTrace());
-      return null;
     }
   }
 

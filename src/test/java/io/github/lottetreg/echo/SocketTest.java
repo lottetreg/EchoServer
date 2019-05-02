@@ -16,11 +16,14 @@ public class SocketTest {
   private Socket socket;
 
   private class MockServerSocket extends ServerSocket {
+    public java.net.Socket socket;
+
     public MockServerSocket() throws IOException {}
 
     public java.net.Socket accept() {
       SocketTest.this.calledAccept = true;
-      return new java.net.Socket();
+      this.socket = new java.net.Socket();
+      return this.socket;
     }
   }
 
@@ -56,14 +59,26 @@ public class SocketTest {
   }
 
   @Test
-  public void testAcceptConnection() throws IOException {
-    ServerSocket mockServerSocket = new MockServerSocket();
+  public void testAcceptConnectionAcceptsTheConnection() throws IOException {
+    MockServerSocket mockServerSocket = new MockServerSocket();
     socket.setServerSocket(mockServerSocket);
 
     socket.setPort(9000);
-    socket.acceptConnection();
+    socket.acceptConnection(new Connection());
 
     assertEquals(true, calledAccept);
+  }
+
+  @Test
+  public void testAcceptConnectionSetsTheSocketOnTheConnection() throws IOException {
+    MockServerSocket mockServerSocket = new MockServerSocket();
+    socket.setServerSocket(mockServerSocket);
+    Connection connection = new Connection();
+
+    socket.setPort(9000);
+    socket.acceptConnection(connection);
+
+    assertEquals(mockServerSocket.socket, connection.socket);
   }
 
   @Test

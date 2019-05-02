@@ -14,11 +14,20 @@ public class Server {
   public void start(int portNumber) {
     this.socket.setPort(portNumber);
     this.out.println("Waiting for connection");
-    this.connection = this.socket.acceptConnection();
+
+    this.socket.acceptConnection(this.connection);
     this.out.println("Connection accepted");
+
+    Reader reader = new Reader();
+    reader.setConnection(this.connection);
+    out.println(reader.readLine());
   }
 
   public void setSocket(Socket socket) {
     this.socket = socket;
+  }
+
+  public void setConnection(Connection connection) {
+    this.connection = connection;
   }
 }
