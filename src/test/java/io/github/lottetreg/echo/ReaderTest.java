@@ -14,6 +14,12 @@ import java.net.Socket;
 public class ReaderTest {
   private Reader reader;
 
+  private class MockConnection extends Connection {
+    MockConnection() {
+      this.socket = new MockSocket();
+    }
+  }
+
   private class MockSocket extends Socket {
     public InputStream getInputStream() {
       byte[] byteArray = "Some string".getBytes();
@@ -42,9 +48,7 @@ public class ReaderTest {
 
   @Test
   public void testReadLine() {
-    // better to mock the socket or the connection instead?
-    Connection connection = new Connection();
-    connection.setSocket(new MockSocket());
+    MockConnection connection = new MockConnection();
     reader.setConnection(connection);
 
     assertEquals(reader.readLine(), "Some string");

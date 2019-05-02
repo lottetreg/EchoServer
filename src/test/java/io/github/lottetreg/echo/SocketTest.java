@@ -18,11 +18,12 @@ public class SocketTest {
   private class MockServerSocket extends ServerSocket {
     public java.net.Socket socket;
 
-    public MockServerSocket() throws IOException {}
+    public MockServerSocket() throws IOException {
+      this.socket = new java.net.Socket();
+    }
 
     public java.net.Socket accept() {
       SocketTest.this.calledAccept = true;
-      this.socket = new java.net.Socket();
       return this.socket;
     }
   }
@@ -59,7 +60,7 @@ public class SocketTest {
   }
 
   @Test
-  public void testAcceptConnectionAcceptsTheConnection() throws IOException {
+  public void testAcceptConnectionCallsAcceptOnTheServerSocket() throws IOException {
     MockServerSocket mockServerSocket = new MockServerSocket();
     socket.setServerSocket(mockServerSocket);
 

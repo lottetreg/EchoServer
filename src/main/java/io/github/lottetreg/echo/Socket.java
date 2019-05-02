@@ -32,7 +32,6 @@ public class Socket {
   public void acceptConnection(Connection connection) {
     try {
       java.net.Socket socket = this.serverSocket.accept();
-      System.out.println("Connection accepted on port " + this.serverSocket.getLocalPort());
       connection.setSocket(socket);
     } catch (IOException e) {
       System.out.println(e.getStackTrace());
