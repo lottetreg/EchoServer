@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.instanceOf;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -28,13 +27,6 @@ class MockConnection extends Connection {
 }
 
 public class ReaderTest {
-  private Reader reader;
-
-  @Before
-  public void setUp() {
-    reader = new Reader.Builder().build();
-  }
-
   @Test
   public void itIsCreatedWithABuilder() {
     Reader reader = new Reader.Builder().build();
@@ -62,6 +54,8 @@ public class ReaderTest {
 
   @Test
   public void testItHasAConnection() {
+    Reader reader = new Reader.Builder().build();
+
     assertThat(reader.connection, instanceOf(Connection.class));
   }
 

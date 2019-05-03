@@ -13,6 +13,22 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
+class MockReader extends Reader {
+  MockReader(Builder builder) {
+    super(builder);
+  }
+
+  public String readLine() {
+    return "Some string";
+  }
+
+  public static class Builder extends Reader.Builder {
+    public MockReader build() {
+      return new MockReader(this);
+    }
+  }
+}
+
 @RunWith(Enclosed.class)
 public class ServerTest {
   private static ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -39,16 +55,10 @@ public class ServerTest {
       }
     }
 
-    private class MockReader extends Reader {
-      public String readLine() {
-        return "Some string";
-      }
-    }
-
     @Before
     public void setUp() {
       Socket socket = new MockSocket();
-      Reader reader = new MockReader();
+      Reader reader = new MockReader.Builder().build();
 
       server = new Server(out);
       server.setSocket(socket);

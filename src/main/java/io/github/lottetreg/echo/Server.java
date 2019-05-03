@@ -10,7 +10,7 @@ public class Server {
     this.out = out;
     this.socket = new Socket();
     this.connection = new Connection.Builder().build();
-    this.reader = new Reader();
+    this.reader = new Reader.Builder().build();
   }
 
   public void start(int portNumber) {
