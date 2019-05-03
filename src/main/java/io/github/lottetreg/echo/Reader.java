@@ -30,13 +30,13 @@ public class Reader {
   }
 
   private BufferedReader newBufferedReader() {
-    InputStream inputStream = connection.getInputStream();
+    InputStream inputStream = this.connection.getInputStream();
     InputStreamReader streamReader = new InputStreamReader(inputStream);
     return new BufferedReader(streamReader);
   }
 
   public static class Builder {
-    public Connection connection = new Connection.Builder().build();
+    private Connection connection = new Connection.Builder().build();
 
     public Builder setConnection(Connection connection) {
       this.connection = connection;

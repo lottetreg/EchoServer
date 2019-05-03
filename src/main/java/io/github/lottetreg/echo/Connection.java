@@ -23,8 +23,6 @@ public class Connection {
   public static class Builder {
     private Socket socket = new Socket();
 
-    public Builder() {}
-
     public Builder setSocket(Socket socket) {
       this.socket = socket;
       return this;
