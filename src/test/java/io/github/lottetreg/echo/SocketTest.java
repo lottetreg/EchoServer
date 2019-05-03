@@ -68,7 +68,9 @@ public class SocketTest {
   public void testSetServerSocket() throws IOException {
     ServerSocket serverSocket = new ServerSocket();
 
-    socket.setServerSocket(serverSocket);
+    Socket socket = new Socket.Builder()
+            .setServerSocket(serverSocket)
+            .build();
 
     assertEquals(serverSocket, socket.serverSocket);
   }
@@ -78,28 +80,40 @@ public class SocketTest {
     socket.setPort(9000);
 
     assertEquals(9000, socket.serverSocket.getLocalPort());
+
+    socket.close();
   }
 
   @Test
   public void testAcceptConnectionCallsAcceptOnTheServerSocket() throws IOException {
     MockServerSocket mockServerSocket = new MockServerSocket();
-    socket.setServerSocket(mockServerSocket);
+    Socket socket = new Socket.Builder()
+            .setServerSocket(mockServerSocket)
+            .build();
+
     socket.setPort(9000);
 
     socket.acceptConnection();
 
     assertEquals(true, calledAccept);
+
+    socket.close();
   }
 
   @Test
   public void testAcceptConnectionSetsTheSocketOnTheConnection() throws IOException {
     MockServerSocket mockServerSocket = new MockServerSocket();
-    socket.setServerSocket(mockServerSocket);
+    Socket socket = new Socket.Builder()
+            .setServerSocket(mockServerSocket)
+            .build();
+
     socket.setPort(9000);
 
     Connection connection = socket.acceptConnection();
 
     assertEquals(mockServerSocket.socket, connection.socket);
+
+    socket.close();
   }
 
   @Test

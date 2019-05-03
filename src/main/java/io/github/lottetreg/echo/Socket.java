@@ -11,10 +11,6 @@ public class Socket {
     this.serverSocket = builder.serverSocket;
   }
 
-  public void setServerSocket(ServerSocket serverSocket) {
-    this.serverSocket = serverSocket;
-  }
-
   public void setPort(int portNumber) {
     String hostname = "127.0.0.1";
     InetSocketAddress socketAddress = new InetSocketAddress(hostname, portNumber);
