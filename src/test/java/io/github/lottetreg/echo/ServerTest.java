@@ -11,6 +11,7 @@ import java.io.PrintStream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 class MockReader extends Reader {
@@ -59,6 +60,24 @@ public class ServerTest {
     @Test
     public void testItCreatesANewConnection () {
       assertThat(new Server(out).connection, instanceOf(Connection.class));
+    }
+
+    @Test
+    public void itHasADefaultSocket() {
+      Server server = new Server.Builder().build();
+
+      assertThat(server.socket, instanceOf(Socket.class));
+    }
+
+    @Test
+    public void theSocketCanBeSetThroughTheBuilder() {
+      Socket socket = new Socket.Builder().build();
+
+      Server server = new Server.Builder()
+              .setSocket(socket)
+              .build();
+
+      assertEquals(server.socket, socket);
     }
   }
 

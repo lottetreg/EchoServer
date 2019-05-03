@@ -13,6 +13,10 @@ public class Server {
     this.reader = new Reader.Builder().build();
   }
 
+  Server(Builder builder) {
+    this.socket = builder.socket;
+  }
+
   public void start(int portNumber) {
     this.socket.setPort(portNumber);
     this.out.println("Waiting for connection");
@@ -30,5 +34,18 @@ public class Server {
 
   public void setReader(Reader reader) {
     this.reader = reader;
+  }
+
+  public static class Builder {
+    private Socket socket = new Socket.Builder().build();
+
+    public Builder setSocket(Socket socket) {
+      this.socket = socket;
+      return this;
+    }
+
+    public Server build() {
+      return new Server(this);
+    }
   }
 }
