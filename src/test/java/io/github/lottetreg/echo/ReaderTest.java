@@ -15,8 +15,8 @@ public class ReaderTest {
   private Reader reader;
 
   private class MockConnection extends Connection {
-    MockConnection() {
-      this.socket = new MockSocket();
+    MockConnection(Builder builder) {
+      super(builder);
     }
   }
 
@@ -39,7 +39,7 @@ public class ReaderTest {
 
   @Test
   public void testSetConnection() {
-    Connection connection = new Connection();
+    Connection connection = new Connection.Builder().build();
 
     reader.setConnection(connection);
 
@@ -48,7 +48,10 @@ public class ReaderTest {
 
   @Test
   public void testReadLine() {
-    MockConnection connection = new MockConnection();
+    MockSocket socket = new MockSocket();
+    Connection connection = new MockConnection.Builder()
+            .setSocket(socket)
+            .build();
     reader.setConnection(connection);
 
     assertEquals(reader.readLine(), "Some string");

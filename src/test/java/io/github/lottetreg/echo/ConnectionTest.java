@@ -26,27 +26,37 @@ public class ConnectionTest {
   }
 
   @Test
-  public void itCreatesANewSocket() {
-    Connection connection = new Connection();
+  public void itIsCreatedWithABuilder() {
+    Connection connection = new Connection.Builder().build();
+
+    assertThat(connection, instanceOf(Connection.class));
+  }
+
+  @Test
+  public void itHasADefaultSocket() {
+    Connection connection = new Connection.Builder().build();
 
     assertThat(connection.socket, instanceOf(Socket.class));
   }
 
   @Test
-  public void testSetSocket() {
+  public void theSocketCanBeSetThroughTheBuilder() {
     Socket socket = new Socket();
-    Connection connection = new Connection();
 
-    connection.setSocket(socket);
+    Connection connection = new Connection.Builder()
+            .setSocket(socket)
+            .build();
 
-    assertEquals(socket, connection.socket);
+    assertEquals(connection.socket, socket);
   }
 
   @Test
-  public void testGetInputStream() throws IOException {
+  public void testGetInputStreamReturnsTheSocketsInputStream() throws IOException {
     Socket socket = new MockSocket();
-    Connection connection = new Connection();
-    connection.setSocket(socket);
+
+    Connection connection = new Connection.Builder()
+            .setSocket(socket)
+            .build();
 
     InputStream inputStream = connection.getInputStream();
 

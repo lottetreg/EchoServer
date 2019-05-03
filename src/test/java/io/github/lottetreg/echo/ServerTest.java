@@ -6,9 +6,7 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.PrintStream;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -36,31 +34,25 @@ public class ServerTest {
     private Server server;
 
     private class MockSocket extends Socket {
-      MockSocket() {
-        super();
+      public Connection acceptConnection() {
+        return new Connection.Builder().build();
       }
-
-      public void acceptConnection(Connection connection) {}
     }
 
-    private class MockConnection extends Connection {
-      MockConnection() {
-        super();
-      }
-
-      public InputStream getInputStream() {
-        byte[] byteArray = "Some string".getBytes();
-        return new ByteArrayInputStream(byteArray);
+    private class MockReader extends Reader {
+      public String readLine() {
+        return "Some string";
       }
     }
 
     @Before
     public void setUp() {
-      MockSocket mockSocket = new MockSocket();
-      MockConnection connection = new MockConnection();
+      Socket socket = new MockSocket();
+      Reader reader = new MockReader();
+
       server = new Server(out);
-      server.setSocket(mockSocket);
-      server.setConnection(connection);
+      server.setSocket(socket);
+      server.setReader(reader);
     }
 
     @After

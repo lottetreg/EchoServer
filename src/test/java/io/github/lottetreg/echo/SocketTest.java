@@ -63,9 +63,9 @@ public class SocketTest {
   public void testAcceptConnectionCallsAcceptOnTheServerSocket() throws IOException {
     MockServerSocket mockServerSocket = new MockServerSocket();
     socket.setServerSocket(mockServerSocket);
-
     socket.setPort(9000);
-    socket.acceptConnection(new Connection());
+
+    socket.acceptConnection();
 
     assertEquals(true, calledAccept);
   }
@@ -74,10 +74,9 @@ public class SocketTest {
   public void testAcceptConnectionSetsTheSocketOnTheConnection() throws IOException {
     MockServerSocket mockServerSocket = new MockServerSocket();
     socket.setServerSocket(mockServerSocket);
-    Connection connection = new Connection();
-
     socket.setPort(9000);
-    socket.acceptConnection(connection);
+
+    Connection connection = socket.acceptConnection();
 
     assertEquals(mockServerSocket.socket, connection.socket);
   }
