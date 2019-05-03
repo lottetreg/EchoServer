@@ -1,7 +1,7 @@
 package io.github.lottetreg.echo;
 
 public class Server {
-  private Output out;
+  public Output out;
   public Socket socket;
   public Connection connection;
   public Reader reader;
@@ -14,7 +14,9 @@ public class Server {
   }
 
   Server(Builder builder) {
+    this.out = builder.out;
     this.socket = builder.socket;
+    this.reader = builder.reader;
   }
 
   public void start(int portNumber) {
@@ -37,10 +39,21 @@ public class Server {
   }
 
   public static class Builder {
+    public Output out;
     private Socket socket = new Socket.Builder().build();
+    private Reader reader = new Reader.Builder().build();
+
+    Builder(Output out) {
+      this.out = out;
+    }
 
     public Builder setSocket(Socket socket) {
       this.socket = socket;
+      return this;
+    }
+
+    public Builder setReader(Reader reader) {
+      this.reader = reader;
       return this;
     }
 

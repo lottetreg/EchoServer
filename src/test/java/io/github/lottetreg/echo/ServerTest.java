@@ -64,7 +64,7 @@ public class ServerTest {
 
     @Test
     public void itHasADefaultSocket() {
-      Server server = new Server.Builder().build();
+      Server server = new Server.Builder(out).build();
 
       assertThat(server.socket, instanceOf(Socket.class));
     }
@@ -73,11 +73,36 @@ public class ServerTest {
     public void theSocketCanBeSetThroughTheBuilder() {
       Socket socket = new Socket.Builder().build();
 
-      Server server = new Server.Builder()
+      Server server = new Server.Builder(out)
               .setSocket(socket)
               .build();
 
       assertEquals(server.socket, socket);
+    }
+
+    @Test
+    public void itHasADefaultReader() {
+      Server server = new Server.Builder(out).build();
+
+      assertThat(server.reader, instanceOf(Reader.class));
+    }
+
+    @Test
+    public void theReaderCanBeSetThroughTheBuilder() {
+      Reader reader = new Reader.Builder().build();
+
+      Server server = new Server.Builder(out)
+              .setReader(reader)
+              .build();
+
+      assertEquals(server.reader, reader);
+    }
+
+    @Test
+    public void theOutIsSetThroughTheBuilder() {
+      Server server = new Server.Builder(out).build();
+
+      assertEquals(server.out, out);
     }
   }
 
