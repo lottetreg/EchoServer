@@ -6,13 +6,6 @@ public class Server {
   public Connection connection;
   public Reader reader;
 
-  Server(Output out) {
-    this.out = out;
-    this.socket = new Socket.Builder().build();
-    this.connection = new Connection.Builder().build();
-    this.reader = new Reader.Builder().build();
-  }
-
   Server(Builder builder) {
     this.out = builder.out;
     this.socket = builder.socket;

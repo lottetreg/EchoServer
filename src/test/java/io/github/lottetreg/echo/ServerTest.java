@@ -53,16 +53,6 @@ public class ServerTest {
 
   public static class SetUpTests {
     @Test
-    public void testItCreatesANewSocket () {
-      assertThat(new Server(out).socket, instanceOf(Socket.class));
-    }
-
-    @Test
-    public void testItCreatesANewConnection () {
-      assertThat(new Server(out).connection, instanceOf(Connection.class));
-    }
-
-    @Test
     public void itHasADefaultSocket() {
       Server server = new Server.Builder(out).build();
 
