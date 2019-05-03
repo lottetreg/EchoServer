@@ -13,7 +13,7 @@ public class EchoServerTest {
     Thread serverHandlerThread = new ServerHandlerThread();
     serverHandlerThread.start();
 
-    Socket socket = new Socket("0.0.0.0", portNumber);
+    Socket socket = new Socket("localhost", portNumber);
 
     socket.close();
   }
