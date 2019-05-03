@@ -28,13 +28,6 @@ class MockConnection extends Connection {
 
 public class ReaderTest {
   @Test
-  public void itIsCreatedWithABuilder() {
-    Reader reader = new Reader.Builder().build();
-
-    assertThat(reader, instanceOf(Reader.class));
-  }
-
-  @Test
   public void itHasADefaultConnection() {
     Reader reader = new Reader.Builder().build();
 

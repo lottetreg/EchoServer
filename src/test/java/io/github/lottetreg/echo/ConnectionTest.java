@@ -26,13 +26,6 @@ public class ConnectionTest {
   }
 
   @Test
-  public void itIsCreatedWithABuilder() {
-    Connection connection = new Connection.Builder().build();
-
-    assertThat(connection, instanceOf(Connection.class));
-  }
-
-  @Test
   public void itHasADefaultSocket() {
     Connection connection = new Connection.Builder().build();
 

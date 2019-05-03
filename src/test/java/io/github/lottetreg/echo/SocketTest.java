@@ -4,9 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.Before;
-import org.junit.After;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -14,7 +11,6 @@ import java.net.ServerSocket;
 
 public class SocketTest {
   private boolean calledAccept;
-  private Socket socket;
 
   private class MockServerSocket extends ServerSocket {
     public java.net.Socket socket;
@@ -29,28 +25,11 @@ public class SocketTest {
     }
   }
 
-  @Before
-  public void setUp() {
-    socket = new Socket.Builder().build();
-  }
-
-  @After
-  public void tearDown() {
-    socket.close();
-  }
-
-  @Test
-  public void itIsCreatedWithABuilder() {
-    Socket socket = new Socket.Builder().build();
-
-    assertThat(socket, CoreMatchers.instanceOf(Socket.class));
-  }
-
   @Test
   public void itHasADefaultServerSocket() {
     Socket socket = new Socket.Builder().build();
 
-    assertThat(socket.serverSocket, CoreMatchers.instanceOf(ServerSocket.class));
+    assertThat(socket.serverSocket, instanceOf(ServerSocket.class));
   }
 
   @Test
@@ -64,19 +43,11 @@ public class SocketTest {
     assertEquals(socket.serverSocket, serverSocket);
   }
 
-  @Test
-  public void testSetServerSocket() throws IOException {
-    ServerSocket serverSocket = new ServerSocket();
-
-    Socket socket = new Socket.Builder()
-            .setServerSocket(serverSocket)
-            .build();
-
-    assertEquals(serverSocket, socket.serverSocket);
-  }
 
   @Test
   public void testSetPort() {
+    Socket socket = new Socket.Builder().build();
+
     socket.setPort(9000);
 
     assertEquals(9000, socket.serverSocket.getLocalPort());
@@ -86,9 +57,8 @@ public class SocketTest {
 
   @Test
   public void testAcceptConnectionCallsAcceptOnTheServerSocket() throws IOException {
-    MockServerSocket mockServerSocket = new MockServerSocket();
     Socket socket = new Socket.Builder()
-            .setServerSocket(mockServerSocket)
+            .setServerSocket(new MockServerSocket())
             .build();
 
     socket.setPort(9000);
@@ -118,6 +88,8 @@ public class SocketTest {
 
   @Test
   public void testClose() {
+    Socket socket = new Socket.Builder().build();
+
     socket.close();
 
     assertEquals(true, socket.serverSocket.isClosed());
