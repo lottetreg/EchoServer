@@ -30,14 +30,6 @@ public class Server {
     out.println(this.reader.readLine());
   }
 
-  public void setSocket(Socket socket) {
-    this.socket = socket;
-  }
-
-  public void setReader(Reader reader) {
-    this.reader = reader;
-  }
-
   public static class Builder {
     public Output out;
     private Socket socket = new Socket.Builder().build();

@@ -114,9 +114,10 @@ public class ServerTest {
       Socket socket = new MockSocket.Builder().build();
       Reader reader = new MockReader.Builder().build();
 
-      server = new Server(out);
-      server.setSocket(socket);
-      server.setReader(reader);
+      server = new Server.Builder(out)
+              .setSocket(socket)
+              .setReader(reader)
+              .build();
     }
 
     @After
