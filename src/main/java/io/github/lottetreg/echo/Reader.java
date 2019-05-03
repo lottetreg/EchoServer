@@ -12,6 +12,10 @@ public class Reader {
     this.connection = new Connection.Builder().build();
   }
 
+  Reader(Builder builder) {
+    this.connection = builder.connection;
+  }
+
   public void setConnection(Connection connection) {
     this.connection = connection;
   }
@@ -29,5 +33,18 @@ public class Reader {
     InputStream inputStream = connection.getInputStream();
     InputStreamReader streamReader = new InputStreamReader(inputStream);
     return new BufferedReader(streamReader);
+  }
+
+  public static class Builder {
+    public Connection connection = new Connection.Builder().build();
+
+    public Builder setConnection(Connection connection) {
+      this.connection = connection;
+      return this;
+    }
+
+    public Reader build() {
+      return new Reader(this);
+    }
   }
 }

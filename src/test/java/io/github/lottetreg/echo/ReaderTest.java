@@ -33,6 +33,31 @@ public class ReaderTest {
   }
 
   @Test
+  public void itIsCreatedWithABuilder() {
+    Reader reader = new Reader.Builder().build();
+
+    assertThat(reader, instanceOf(Reader.class));
+  }
+
+  @Test
+  public void itHasADefaultConnection() {
+    Reader reader = new Reader.Builder().build();
+
+    assertThat(reader.connection, instanceOf(Connection.class));
+  }
+
+  @Test
+  public void theConnectionCanBeSetThroughTheBuilder() {
+    Connection connection = new Connection.Builder().build();
+
+    Reader reader = new Reader.Builder()
+            .setConnection(connection)
+            .build();
+
+    assertEquals(reader.connection, connection);
+  }
+
+  @Test
   public void testItHasAConnection() {
     assertThat(reader.connection, instanceOf(Connection.class));
   }
