@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.After;
 import org.junit.Test;
@@ -36,6 +37,31 @@ public class SocketTest {
   @After
   public void tearDown() {
     socket.close();
+  }
+
+  @Test
+  public void itIsCreatedWithABuilder() {
+    Socket socket = new Socket.Builder().build();
+
+    assertThat(socket, CoreMatchers.instanceOf(Socket.class));
+  }
+
+  @Test
+  public void itHasADefaultServerSocket() {
+    Socket socket = new Socket.Builder().build();
+
+    assertThat(socket.serverSocket, CoreMatchers.instanceOf(ServerSocket.class));
+  }
+
+  @Test
+  public void theServerSocketCanBeSetThroughTheBuilder() throws IOException {
+    ServerSocket serverSocket = new ServerSocket();
+
+    Socket socket = new Socket.Builder()
+            .setServerSocket(serverSocket)
+            .build();
+
+    assertEquals(socket.serverSocket, serverSocket);
   }
 
   @Test

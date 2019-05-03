@@ -16,6 +16,10 @@ public class Socket {
     }
   }
 
+  public Socket(Builder builder) {
+    this.serverSocket = builder.serverSocket;
+  }
+
   public void setServerSocket(ServerSocket serverSocket) {
     this.serverSocket = serverSocket;
   }
@@ -45,6 +49,27 @@ public class Socket {
       this.serverSocket.close();
     } catch (IOException e) {
       System.out.println(e);
+    }
+  }
+
+  public static class Builder {
+    private ServerSocket serverSocket;
+
+    Builder() {
+      try {
+        this.serverSocket = new ServerSocket();
+      } catch (IOException e) {
+        System.out.println(e);
+      }
+    }
+
+    public Builder setServerSocket(ServerSocket serverSocket) {
+      this.serverSocket = serverSocket;
+      return this;
+    }
+
+    public Socket build() {
+      return new Socket(this);
     }
   }
 }
