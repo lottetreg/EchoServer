@@ -8,7 +8,7 @@ public class Server {
 
   Server(Output out) {
     this.out = out;
-    this.socket = new Socket();
+    this.socket = new Socket.Builder().build();
     this.connection = new Connection.Builder().build();
     this.reader = new Reader.Builder().build();
   }

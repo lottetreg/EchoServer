@@ -31,7 +31,7 @@ public class SocketTest {
 
   @Before
   public void setUp() {
-    socket = new Socket();
+    socket = new Socket.Builder().build();
   }
 
   @After
@@ -62,11 +62,6 @@ public class SocketTest {
             .build();
 
     assertEquals(socket.serverSocket, serverSocket);
-  }
-
-  @Test
-  public void testCreatesAServerSocket() {
-    assertThat(socket.serverSocket, instanceOf(ServerSocket.class));
   }
 
   @Test

@@ -7,15 +7,6 @@ import java.net.ServerSocket;
 public class Socket {
   public ServerSocket serverSocket;
 
-  public Socket() {
-    try {
-      this.serverSocket = new ServerSocket();
-    } catch (IOException e) {
-      System.out.println(e);
-      this.serverSocket = null;
-    }
-  }
-
   public Socket(Builder builder) {
     this.serverSocket = builder.serverSocket;
   }

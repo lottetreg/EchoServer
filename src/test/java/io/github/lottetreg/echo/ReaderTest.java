@@ -53,13 +53,6 @@ public class ReaderTest {
   }
 
   @Test
-  public void testItHasAConnection() {
-    Reader reader = new Reader.Builder().build();
-
-    assertThat(reader.connection, instanceOf(Connection.class));
-  }
-
-  @Test
   public void testSetConnection() {
     Connection connection = new Connection.Builder().build();
     Reader reader = new Reader.Builder()
