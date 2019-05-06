@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 
 
 public class WriterTest {
@@ -19,13 +21,16 @@ public class WriterTest {
 
   @Test
   public void itPrintsOutFromTheConnection() {
-    MockConnection connection = new MockConnection.Builder().build();
+    OutputStream outputStream = new ByteArrayOutputStream();
+    MockConnection connection = new MockConnection.Builder()
+            .setOutputStream(outputStream)
+            .build();
     Writer writer = new Writer.Builder()
             .setConnection(connection)
             .build();
 
     writer.println("Some other string");
 
-    assertEquals("Some other string\n", connection.getOutputStream().toString());
+    assertEquals("Some other string\n", outputStream.toString());
   }
 }

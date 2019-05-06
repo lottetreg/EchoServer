@@ -1,21 +1,20 @@
 package io.github.lottetreg.echo;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 public class MockConnection extends Connection {
-  private ByteArrayOutputStream outputStream;
+  private OutputStream outputStream;
+  private InputStream inputStream;
 
   MockConnection(Builder builder) {
     super(builder);
-    this.outputStream = new ByteArrayOutputStream();
+    this.outputStream = builder.outputStream;
+    this.inputStream = builder.inputStream;
   }
 
   public InputStream getInputStream() {
-    byte[] byteArray = "Some string".getBytes();
-    return new ByteArrayInputStream(byteArray);
+    return this.inputStream;
   }
 
   public OutputStream getOutputStream() {
@@ -23,6 +22,19 @@ public class MockConnection extends Connection {
   }
 
   public static class Builder extends Connection.Builder {
+    private OutputStream outputStream;
+    private InputStream inputStream;
+
+    public Builder setOutputStream(OutputStream outputStream) {
+      this.outputStream = outputStream;
+      return this;
+    }
+
+    public Builder setInputStream(InputStream inputStream) {
+      this.inputStream = inputStream;
+      return this;
+    }
+
     public MockConnection build() {
       return new MockConnection(this);
     }

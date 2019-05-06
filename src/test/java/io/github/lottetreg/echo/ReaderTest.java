@@ -6,6 +6,9 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 public class ReaderTest {
   @Test
   public void itHasADefaultConnection() {
@@ -37,7 +40,11 @@ public class ReaderTest {
 
   @Test
   public void testReadLine() {
-    Connection connection = new MockConnection.Builder().build();
+    byte[] byteArray = "Some string".getBytes();
+    InputStream inputStream = new ByteArrayInputStream(byteArray);
+    Connection connection = new MockConnection.Builder()
+            .setInputStream(inputStream)
+            .build();
     Reader reader = new Reader.Builder()
             .setConnection(connection)
             .build();
