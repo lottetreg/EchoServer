@@ -4,55 +4,77 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.instanceOf;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.net.Socket;
+
+class MockConnection extends Connection {
+  MockConnection(Builder builder) {
+    super(builder);
+  }
+
+  public InputStream getInputStream() {
+    byte[] byteArray = "Some string".getBytes();
+    return new ByteArrayInputStream(byteArray);
+  }
+
+  public static class Builder extends Connection.Builder {
+    public MockConnection build() {
+      return new MockConnection(this);
+    }
+  }
+}
 
 public class ReaderTest {
-  private Reader reader;
+  @Test
+  public void itIsCreatedWithABuilder() {
+    Reader reader = new Reader.Builder().build();
 
-  private class MockConnection extends Connection {
-    MockConnection(Builder builder) {
-      super(builder);
-    }
+    assertThat(reader, instanceOf(Reader.class));
   }
 
-  private class MockSocket extends Socket {
-    public InputStream getInputStream() {
-      byte[] byteArray = "Some string".getBytes();
-      return new ByteArrayInputStream(byteArray);
-    }
+  @Test
+  public void itHasADefaultConnection() {
+    Reader reader = new Reader.Builder().build();
+
+    assertThat(reader.connection, instanceOf(Connection.class));
   }
 
-  @Before
-  public void setUp() {
-    reader = new Reader();
+  @Test
+  public void theConnectionCanBeSetThroughTheBuilder() {
+    Connection connection = new Connection.Builder().build();
+
+    Reader reader = new Reader.Builder()
+            .setConnection(connection)
+            .build();
+
+    assertEquals(reader.connection, connection);
   }
 
   @Test
   public void testItHasAConnection() {
+    Reader reader = new Reader.Builder().build();
+
     assertThat(reader.connection, instanceOf(Connection.class));
   }
 
   @Test
   public void testSetConnection() {
     Connection connection = new Connection.Builder().build();
-
-    reader.setConnection(connection);
+    Reader reader = new Reader.Builder()
+            .setConnection(connection)
+            .build();
 
     assertEquals(reader.connection, connection);
   }
 
   @Test
   public void testReadLine() {
-    MockSocket socket = new MockSocket();
-    Connection connection = new MockConnection.Builder()
-            .setSocket(socket)
+    Connection connection = new MockConnection.Builder().build();
+    Reader reader = new Reader.Builder()
+            .setConnection(connection)
             .build();
-    reader.setConnection(connection);
 
     assertEquals(reader.readLine(), "Some string");
   }
