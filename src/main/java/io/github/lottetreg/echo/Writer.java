@@ -16,6 +16,10 @@ public class Writer {
     printWriter.println(output);
   }
 
+  public void setConnection(Connection connection) {
+    this.connection = connection;
+  }
+
   public static class Builder {
     private Connection connection = new Connection.Builder().build();
 

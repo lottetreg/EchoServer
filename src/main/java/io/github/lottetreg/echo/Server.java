@@ -5,11 +5,13 @@ public class Server {
   public Socket socket;
   public Connection connection;
   public Reader reader;
+  public Writer writer;
 
   Server(Builder builder) {
     this.out = builder.out;
     this.socket = builder.socket;
     this.reader = builder.reader;
+    this.writer = builder.writer;
   }
 
   public void start(int portNumber) {
@@ -20,13 +22,16 @@ public class Server {
     this.out.println("Connection accepted");
 
     this.reader.setConnection(this.connection);
-    out.println(this.reader.readLine());
+    this.writer.setConnection(this.connection);
+
+    this.writer.println(this.reader.readLine());
   }
 
   public static class Builder {
     public Output out;
     private Socket socket = new Socket.Builder().build();
     private Reader reader = new Reader.Builder().build();
+    private Writer writer = new Writer.Builder().build();
 
     Builder(Output out) {
       this.out = out;
@@ -39,6 +44,11 @@ public class Server {
 
     public Builder setReader(Reader reader) {
       this.reader = reader;
+      return this;
+    }
+
+    public Builder setWriter(Writer writer) {
+      this.writer = writer;
       return this;
     }
 
