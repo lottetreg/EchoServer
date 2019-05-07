@@ -25,28 +25,8 @@ class MockWriter extends Writer {
 }
 
 class MockReader extends Reader {
-  private String inputString;
-
-  MockReader(Builder builder) {
-    super(builder);
-    this.inputString = builder.inputString;
-  }
-
   public String readLine() {
-    return this.inputString;
-  }
-
-  public static class Builder extends Reader.Builder {
-    private String inputString;
-
-    public Builder setInputString(String inputString) {
-      this.inputString = inputString;
-      return this;
-    }
-
-    public MockReader build() {
-      return new MockReader(this);
-    }
+    return "Some string";
   }
 }
 
@@ -99,7 +79,7 @@ public class ServerTest {
 
     @Test
     public void theReaderCanBeSetThroughTheBuilder() {
-      Reader reader = new Reader.Builder().build();
+      Reader reader = new Reader();
 
       Server server = new Server.Builder(out)
               .setReader(reader)
@@ -140,7 +120,7 @@ public class ServerTest {
     @Before
     public void setUp() {
       Socket socket = new MockSocket.Builder().build();
-      Reader reader = new MockReader.Builder().build();
+      Reader reader = new MockReader();
       Writer writer = new MockWriter();
 
       server = new Server.Builder(out)
@@ -174,9 +154,7 @@ public class ServerTest {
     @Test
     public void itWritesTheInputBackToTheConnectionsOutputStream() {
       Socket socket = new MockSocket.Builder().build();
-      Reader reader = new MockReader.Builder()
-              .setInputString("Some string")
-              .build();
+      Reader reader = new MockReader();
       Writer writer = new MockWriter();
 
       Server server = new Server.Builder(out)

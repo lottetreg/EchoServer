@@ -30,7 +30,7 @@ public class Server {
   public static class Builder {
     public Output out;
     private Socket socket = new Socket.Builder().build();
-    private Reader reader = new Reader.Builder().build();
+    private Reader reader = new Reader();
     private Writer writer = new Writer();
 
     Builder(Output out) {

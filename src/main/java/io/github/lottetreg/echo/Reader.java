@@ -8,10 +8,6 @@ import java.io.InputStreamReader;
 public class Reader {
   public Connection connection;
 
-  Reader(Builder builder) {
-    this.connection = builder.connection;
-  }
-
   public void setConnection(Connection connection) {
     this.connection = connection;
   }
@@ -29,18 +25,5 @@ public class Reader {
     InputStream inputStream = this.connection.getInputStream();
     InputStreamReader streamReader = new InputStreamReader(inputStream);
     return new BufferedReader(streamReader);
-  }
-
-  public static class Builder {
-    private Connection connection = new Connection.Builder().build();
-
-    public Builder setConnection(Connection connection) {
-      this.connection = connection;
-      return this;
-    }
-
-    public Reader build() {
-      return new Reader(this);
-    }
   }
 }
