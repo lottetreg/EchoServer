@@ -31,7 +31,7 @@ public class Server {
     public Output out;
     private Socket socket = new Socket.Builder().build();
     private Reader reader = new Reader.Builder().build();
-    private Writer writer = new Writer.Builder().build();
+    private Writer writer = new Writer();
 
     Builder(Output out) {
       this.out = out;

@@ -18,17 +18,9 @@ class MockWriter extends Writer {
   public boolean calledPrintln;
   public String outputArg;
 
-  MockWriter(Builder builder) { super(builder); }
-
   public void println(String output) {
     this.calledPrintln = true;
     this.outputArg = output;
-  }
-
-  public static class Builder extends Writer.Builder {
-    public MockWriter build() {
-      return new MockWriter(this);
-    }
   }
 }
 
@@ -125,7 +117,7 @@ public class ServerTest {
 
     @Test
     public void theWriterCanBeSetThroughTheBuilder() {
-      Writer writer = new Writer.Builder().build();
+      Writer writer = new Writer();
 
       Server server = new Server.Builder(out)
               .setWriter(writer)
@@ -149,7 +141,7 @@ public class ServerTest {
     public void setUp() {
       Socket socket = new MockSocket.Builder().build();
       Reader reader = new MockReader.Builder().build();
-      Writer writer = new MockWriter.Builder().build();
+      Writer writer = new MockWriter();
 
       server = new Server.Builder(out)
               .setSocket(socket)
@@ -185,7 +177,7 @@ public class ServerTest {
       Reader reader = new MockReader.Builder()
               .setInputString("Some string")
               .build();
-      Writer writer = new MockWriter.Builder().build();
+      Writer writer = new MockWriter();
 
       Server server = new Server.Builder(out)
               .setSocket(socket)

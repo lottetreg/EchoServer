@@ -12,9 +12,8 @@ public class WriterTest {
   @Test
   public void testSetConnection() {
     Connection connection = new Connection.Builder().build();
-    Writer writer  = new Writer.Builder()
-            .setConnection(connection)
-            .build();
+    Writer writer = new Writer();
+    writer.setConnection(connection);
 
     assertEquals(writer.connection, connection);
   }
@@ -25,9 +24,8 @@ public class WriterTest {
     MockConnection connection = new MockConnection.Builder()
             .setOutputStream(outputStream)
             .build();
-    Writer writer = new Writer.Builder()
-            .setConnection(connection)
-            .build();
+    Writer writer = new Writer();
+    writer.setConnection(connection);
 
     writer.println("Some other string");
 
