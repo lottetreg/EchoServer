@@ -24,7 +24,10 @@ public class Server {
     this.reader.setConnection(this.connection);
     this.writer.setConnection(this.connection);
 
-    this.writer.println(this.reader.readLine());
+    String input;
+    while((input = this.reader.readLine()) != null) {
+      this.writer.println(input);
+    }
   }
 
   public static class Builder {

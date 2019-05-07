@@ -12,7 +12,7 @@ public class EchoServerTest {
   Socket socket;
 
   @Test
-  public void itWorks() throws IOException {
+  public void itEchoesTheClientsMessageBackToThem() throws IOException {
     startServer();
     socket = new Socket("localhost", portNumber);
     sendMessageToServer("Hello, World!");

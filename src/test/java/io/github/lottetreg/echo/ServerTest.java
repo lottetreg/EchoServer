@@ -1,5 +1,6 @@
 package io.github.lottetreg.echo;
 
+import junit.framework.AssertionFailedError;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,25 +9,38 @@ import org.junit.runner.RunWith;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 class MockWriter extends Writer {
-  public boolean calledPrintln;
-  public String outputArg;
+  public int printlnCallCount;
+  public LinkedList printlnArgs;
+
+  MockWriter() {
+    this.printlnCallCount = 0;
+    this.printlnArgs = new LinkedList();
+  }
 
   public void println(String output) {
-    this.calledPrintln = true;
-    this.outputArg = output;
+    this.printlnCallCount++;
+    this.printlnArgs.add(output);
   }
 }
 
 class MockReader extends Reader {
+  public String[] readLineOutputs;
+  private int readLineCallCount;
+
+  MockReader() {
+    this.readLineCallCount = 0;
+  }
+
   public String readLine() {
-    return "Some string";
+    this.readLineCallCount++;
+    return this.readLineOutputs[readLineCallCount - 1];
   }
 }
 
@@ -128,6 +142,8 @@ public class ServerTest {
               .setReader(reader)
               .setWriter(writer)
               .build();
+
+      allowReadLineToReturn(reader, new String[] {null});
     }
 
     @After
@@ -157,6 +173,8 @@ public class ServerTest {
       Reader reader = new MockReader();
       Writer writer = new MockWriter();
 
+      allowReadLineToReturn(reader, new String[] {"Some string", null});
+
       Server server = new Server.Builder(out)
               .setSocket(socket)
               .setReader(reader)
@@ -165,8 +183,55 @@ public class ServerTest {
 
       server.start(0);
 
-      assertEquals(true, ((MockWriter) writer).calledPrintln);
-      assertEquals("Some string", ((MockWriter) writer).outputArg);
+      expectPrintlnToBeCalledNTimes(writer, 1);
+      expectPrintlnToReceive(writer, new String[] {"Some string"});
+    }
+
+    @Test
+    public void itWritesMultipleTimesToTheConnectionsOutputStream() {
+      Socket socket = new MockSocket.Builder().build();
+      Reader reader = new MockReader();
+      Writer writer = new MockWriter();
+
+      allowReadLineToReturn(reader, new String[] {"Some string", "Some other string", null});
+
+      Server server = new Server.Builder(out)
+              .setSocket(socket)
+              .setReader(reader)
+              .setWriter(writer)
+              .build();
+
+      server.start(0);
+
+      expectPrintlnToBeCalledNTimes(writer, 2);
+      expectPrintlnToReceive(writer, new String[] {"Some string", "Some other string"});
+    }
+  }
+
+  public static void allowReadLineToReturn(Reader reader, String[] returnValues) {
+    ((MockReader) reader).readLineOutputs = returnValues;
+  }
+
+  public static void expectPrintlnToBeCalledNTimes(Writer writer, int times) {
+    assertEquals(times, ((MockWriter) writer).printlnCallCount);
+  }
+
+  public static void expectPrintlnToReceive(Writer writer, String[] args) {
+    Iterator<String> expectedArgs = new ArrayList<String>(Arrays.asList(args)).iterator();
+    Iterator<String> actualArgs = ((MockWriter) writer).printlnArgs.iterator();
+
+    compareExpectedWithActualArgs(expectedArgs, actualArgs);
+  }
+
+  public static void compareExpectedWithActualArgs(Iterator<String> expectedArgs, Iterator<String> actualArgs) {
+    while(expectedArgs.hasNext()) {
+      String expectedArg = null;
+      try {
+        assertEquals(expectedArg = expectedArgs.next(), actualArgs.next());
+      } catch (NoSuchElementException e) {
+        String message = String.format("Expected println(String s) to receive \"%s\"", expectedArg);
+        throw new AssertionFailedError(message);
+      }
     }
   }
 }
