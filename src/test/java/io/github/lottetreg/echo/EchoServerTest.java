@@ -4,27 +4,26 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+
 import java.net.Socket;
 
 public class EchoServerTest {
   int portNumber = 8080;
+  Socket socket;
 
   @Test
-  public void itEchoesBackToMultipleClients() throws IOException {
+  public void itWorks() throws IOException {
     startServer();
+    socket = new Socket("localhost", portNumber);
+    sendMessageToServer("Hello, World!");
 
-    Socket firstSocket = new Socket("localhost", portNumber);
-    sendMessageToServer(firstSocket,"Hello, World!");
+    assertEquals("Hello, World!", readFromSocketInputStream());
 
-    Socket secondSocket = new Socket("localhost", portNumber);
-    sendMessageToServer(secondSocket, "Oh hai!");
-
-    assertEquals("Hello, World!", readFromSocketInputStream(firstSocket));
-    assertEquals("Oh hai!", readFromSocketInputStream(secondSocket));
-
-    firstSocket.close();
-    secondSocket.close();
+    socket.close();
   }
 
   public void startServer() {
@@ -39,12 +38,12 @@ public class EchoServerTest {
     }
   }
 
-  public void sendMessageToServer(Socket socket, String message) throws IOException {
-    PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
-    printWriter.println(message);
+  public void sendMessageToServer(String message) throws IOException {
+    PrintStream printStream = new PrintStream(socket.getOutputStream(), true);
+    printStream.println(message);
   }
 
-  public String readFromSocketInputStream(Socket socket) throws IOException {
+  public String readFromSocketInputStream() throws IOException {
     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     return bufferedReader.readLine();
   }
