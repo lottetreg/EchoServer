@@ -1,6 +1,5 @@
 package io.github.lottetreg.echo;
 
-import junit.framework.AssertionFailedError;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,48 +8,40 @@ import org.junit.runner.RunWith;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.*;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
-class MockWriter extends Writer {
-  public int printlnCallCount;
-  public LinkedList printlnArgs;
+class MockEcho extends Echo {
+  public int echoCallCount;
 
-  MockWriter() {
-    this.printlnCallCount = 0;
-    this.printlnArgs = new LinkedList();
+  MockEcho(Builder builder) {
+    super(builder);
+    this.echoCallCount = 0;
   }
 
-  public void println(String output) {
-    this.printlnCallCount++;
-    this.printlnArgs.add(output);
-  }
-}
-
-class MockReader extends Reader {
-  public String[] readLineOutputs;
-  private int readLineCallCount;
-
-  MockReader() {
-    this.readLineCallCount = 0;
+  public void echo() {
+    this.echoCallCount++;
   }
 
-  public String readLine() {
-    this.readLineCallCount++;
-    return this.readLineOutputs[readLineCallCount - 1];
+  public static class Builder extends Echo.Builder {
+    public MockEcho build() {
+      return new MockEcho(this);
+    }
   }
 }
 
 class MockSocket extends Socket {
+  public Connection connection;
+
   MockSocket(Builder builder) {
     super(builder);
+    this.connection = new Connection.Builder().build();
   }
 
   public Connection acceptConnection() {
-    return new Connection.Builder().build();
+    return this.connection;
   }
 
   public static class Builder extends Socket.Builder {
@@ -74,6 +65,13 @@ public class ServerTest {
     }
 
     @Test
+    public void itHasADefaultEcho() {
+      Server server = new Server.Builder(out).build();
+
+      assertThat(server.echo, instanceOf(Echo.class));
+    }
+
+    @Test
     public void theSocketCanBeSetThroughTheBuilder() {
       Socket socket = new Socket.Builder().build();
 
@@ -81,69 +79,42 @@ public class ServerTest {
               .setSocket(socket)
               .build();
 
-      assertEquals(server.socket, socket);
+      assertEquals(socket, server.socket);
     }
 
     @Test
-    public void itHasADefaultReader() {
-      Server server = new Server.Builder(out).build();
-
-      assertThat(server.reader, instanceOf(Reader.class));
-    }
-
-    @Test
-    public void theReaderCanBeSetThroughTheBuilder() {
-      Reader reader = new Reader();
+    public void theEchoCanBeSetThroughTheBuilder() {
+      Echo echo = new Echo.Builder().build();
 
       Server server = new Server.Builder(out)
-              .setReader(reader)
+              .setEcho(echo)
               .build();
 
-      assertEquals(server.reader, reader);
-    }
-
-    @Test
-    public void itHasADefaultWriter() {
-      Server server = new Server.Builder(out).build();
-
-      assertThat(server.writer, instanceOf(Writer.class));
-    }
-
-    @Test
-    public void theWriterCanBeSetThroughTheBuilder() {
-      Writer writer = new Writer();
-
-      Server server = new Server.Builder(out)
-              .setWriter(writer)
-              .build();
-
-      assertEquals(server.writer, writer);
+      assertEquals(echo, server.echo);
     }
 
     @Test
     public void theOutIsSetThroughTheBuilder() {
       Server server = new Server.Builder(out).build();
 
-      assertEquals(server.out, out);
+      assertEquals(out, server.out);
     }
   }
 
-  public static class OutputTests {
+  public static class StartMethodTests {
     private Server server;
+    private Socket socket;
+    private Echo echo;
 
     @Before
     public void setUp() {
-      Socket socket = new MockSocket.Builder().build();
-      Reader reader = new MockReader();
-      Writer writer = new MockWriter();
+      socket = new MockSocket.Builder().build();
+      echo = new MockEcho.Builder().build();
 
       server = new Server.Builder(out)
               .setSocket(socket)
-              .setReader(reader)
-              .setWriter(writer)
+              .setEcho(echo)
               .build();
-
-      allowReadLineToReturn(reader, new String[] {null});
     }
 
     @After
@@ -153,85 +124,35 @@ public class ServerTest {
 
     @Test
     public void testWritesWaitingForConnectionMessage() {
-      server.start(9000);
+      server.start(0);
 
       assertThat(bytes.toString(), containsString("Waiting for connection"));
     }
 
     @Test
     public void testWritesConnectionAcceptedMessage() {
-      server.start(9000);
+      server.start(0);
 
       assertThat(bytes.toString(), containsString("Connection accepted"));
     }
-  }
 
-  public static class WritesToTheConnectionTests {
     @Test
-    public void itWritesTheInputBackToTheConnectionsOutputStream() {
-      Socket socket = new MockSocket.Builder().build();
-      Reader reader = new MockReader();
-      Writer writer = new MockWriter();
-
-      allowReadLineToReturn(reader, new String[] {"Some string", null});
-
-      Server server = new Server.Builder(out)
-              .setSocket(socket)
-              .setReader(reader)
-              .setWriter(writer)
-              .build();
-
+    public void itSetsTheEchosReaderAndWriterConnectionsToTheSocketsAcceptedConnection() {
       server.start(0);
 
-      expectPrintlnToBeCalledNTimes(writer, 1);
-      expectPrintlnToReceive(writer, new String[] {"Some string"});
+      assertEquals(((MockSocket) socket).connection, echo.reader.connection);
+      assertEquals(((MockSocket) socket).connection, echo.writer.connection);
     }
 
     @Test
-    public void itWritesMultipleTimesToTheConnectionsOutputStream() {
-      Socket socket = new MockSocket.Builder().build();
-      Reader reader = new MockReader();
-      Writer writer = new MockWriter();
-
-      allowReadLineToReturn(reader, new String[] {"Some string", "Some other string", null});
-
-      Server server = new Server.Builder(out)
-              .setSocket(socket)
-              .setReader(reader)
-              .setWriter(writer)
-              .build();
-
+    public void itCallsEchoOnce() {
       server.start(0);
 
-      expectPrintlnToBeCalledNTimes(writer, 2);
-      expectPrintlnToReceive(writer, new String[] {"Some string", "Some other string"});
+      expectEchoToBeCalledOnce();
     }
-  }
 
-  public static void allowReadLineToReturn(Reader reader, String[] returnValues) {
-    ((MockReader) reader).readLineOutputs = returnValues;
-  }
-
-  public static void expectPrintlnToBeCalledNTimes(Writer writer, int times) {
-    assertEquals(times, ((MockWriter) writer).printlnCallCount);
-  }
-
-  public static void expectPrintlnToReceive(Writer writer, String[] args) {
-    Iterator<String> expectedArgs = new ArrayList<String>(Arrays.asList(args)).iterator();
-    Iterator<String> actualArgs = ((MockWriter) writer).printlnArgs.iterator();
-
-    compareExpectedWithActualArgs(expectedArgs, actualArgs);
-  }
-
-  public static void compareExpectedWithActualArgs(Iterator<String> expectedArgs, Iterator<String> actualArgs) {
-    while(expectedArgs.hasNext()) {
-      String expectedArg = null;
-      try {
-        assertEquals(expectedArg = expectedArgs.next(), actualArgs.next());
-      } catch (NoSuchElementException e) {
-        String message = String.format("Expected println(String s) to receive \"%s\"", expectedArg);
-        throw new AssertionFailedError(message);
-      }
+    public void expectEchoToBeCalledOnce() {
+      assertEquals(1, ((MockEcho) echo).echoCallCount);
     }
   }
 }

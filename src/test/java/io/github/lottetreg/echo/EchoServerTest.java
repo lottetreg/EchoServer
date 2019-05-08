@@ -4,10 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.Socket;
 
 public class EchoServerTest {
@@ -15,7 +12,7 @@ public class EchoServerTest {
   Socket socket;
 
   @Test
-  public void itWorks() throws IOException {
+  public void itEchoesTheClientsMessageBackToThem() throws IOException {
     startServer();
     socket = new Socket("localhost", portNumber);
     sendMessageToServer("Hello, World!");
@@ -38,8 +35,8 @@ public class EchoServerTest {
   }
 
   public void sendMessageToServer(String message) throws IOException {
-    PrintStream printStream = new PrintStream(socket.getOutputStream(), true);
-    printStream.println(message);
+    PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
+    printWriter.println(message);
   }
 
   public String readFromSocketInputStream() throws IOException {
