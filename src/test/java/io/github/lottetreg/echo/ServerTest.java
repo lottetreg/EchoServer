@@ -29,6 +29,22 @@ class MockReader extends Reader {
   }
 }
 
+class MockSocket extends Socket {
+  MockSocket(Builder builder) {
+    super(builder);
+  }
+
+  public Connection acceptConnection() {
+    return new Connection.Builder().build();
+  }
+
+  public static class Builder extends Socket.Builder {
+    public MockSocket build() {
+      return new MockSocket(this);
+    }
+  }
+}
+
 @RunWith(Enclosed.class)
 public class ServerTest {
   private static ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -49,15 +65,9 @@ public class ServerTest {
   public static class OutputTests {
     private Server server;
 
-    private class MockSocket extends Socket {
-      public Connection acceptConnection() {
-        return new Connection.Builder().build();
-      }
-    }
-
     @Before
     public void setUp() {
-      Socket socket = new MockSocket();
+      Socket socket = new MockSocket.Builder().build();
       Reader reader = new MockReader.Builder().build();
 
       server = new Server(out);

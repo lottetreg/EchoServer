@@ -7,17 +7,8 @@ import java.net.ServerSocket;
 public class Socket {
   public ServerSocket serverSocket;
 
-  public Socket() {
-    try {
-      this.serverSocket = new ServerSocket();
-    } catch (IOException e) {
-      System.out.println(e);
-      this.serverSocket = null;
-    }
-  }
-
-  public void setServerSocket(ServerSocket serverSocket) {
-    this.serverSocket = serverSocket;
+  public Socket(Builder builder) {
+    this.serverSocket = builder.serverSocket;
   }
 
   public void setPort(int portNumber) {
@@ -45,6 +36,27 @@ public class Socket {
       this.serverSocket.close();
     } catch (IOException e) {
       System.out.println(e);
+    }
+  }
+
+  public static class Builder {
+    private ServerSocket serverSocket;
+
+    Builder() {
+      try {
+        this.serverSocket = new ServerSocket();
+      } catch (IOException e) {
+        System.out.println(e);
+      }
+    }
+
+    public Builder setServerSocket(ServerSocket serverSocket) {
+      this.serverSocket = serverSocket;
+      return this;
+    }
+
+    public Socket build() {
+      return new Socket(this);
     }
   }
 }

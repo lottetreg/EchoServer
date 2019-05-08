@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
-import org.junit.Before;
-import org.junit.After;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -13,7 +11,6 @@ import java.net.ServerSocket;
 
 public class SocketTest {
   private boolean calledAccept;
-  private Socket socket;
 
   private class MockServerSocket extends ServerSocket {
     public java.net.Socket socket;
@@ -28,61 +25,71 @@ public class SocketTest {
     }
   }
 
-  @Before
-  public void setUp() {
-    socket = new Socket();
-  }
-
-  @After
-  public void tearDown() {
-    socket.close();
-  }
-
   @Test
-  public void testCreatesAServerSocket() {
+  public void itHasADefaultServerSocket() {
+    Socket socket = new Socket.Builder().build();
+
     assertThat(socket.serverSocket, instanceOf(ServerSocket.class));
   }
 
   @Test
-  public void testSetServerSocket() throws IOException {
+  public void theServerSocketCanBeSetThroughTheBuilder() throws IOException {
     ServerSocket serverSocket = new ServerSocket();
 
-    socket.setServerSocket(serverSocket);
+    Socket socket = new Socket.Builder()
+            .setServerSocket(serverSocket)
+            .build();
 
-    assertEquals(serverSocket, socket.serverSocket);
+    assertEquals(socket.serverSocket, serverSocket);
   }
+
 
   @Test
   public void testSetPort() {
+    Socket socket = new Socket.Builder().build();
+
     socket.setPort(9000);
 
     assertEquals(9000, socket.serverSocket.getLocalPort());
+
+    socket.close();
   }
 
   @Test
   public void testAcceptConnectionCallsAcceptOnTheServerSocket() throws IOException {
-    MockServerSocket mockServerSocket = new MockServerSocket();
-    socket.setServerSocket(mockServerSocket);
+    Socket socket = new Socket.Builder()
+            .setServerSocket(new MockServerSocket())
+            .build();
+
     socket.setPort(9000);
 
     socket.acceptConnection();
 
     assertEquals(true, calledAccept);
+
+    socket.close();
   }
 
   @Test
   public void testAcceptConnectionSetsTheSocketOnTheConnection() throws IOException {
     MockServerSocket mockServerSocket = new MockServerSocket();
-    socket.setServerSocket(mockServerSocket);
+    Socket socket = new Socket.Builder()
+            .setServerSocket(mockServerSocket)
+            .build();
+
     socket.setPort(9000);
 
     Connection connection = socket.acceptConnection();
 
     assertEquals(mockServerSocket.socket, connection.socket);
+
+    socket.close();
   }
 
   @Test
   public void testClose() {
+    Socket socket = new Socket.Builder().build();
+
     socket.close();
 
     assertEquals(true, socket.serverSocket.isClosed());
