@@ -13,35 +13,33 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
-class MockEcho extends Echo {
-  public int echoCallCount;
 
-  MockEcho(Builder builder) {
-    super(builder);
-    this.echoCallCount = 0;
+class MockThreadRunner extends ThreadRunner {
+  public int runCallCount;
+
+  MockThreadRunner() {
+    this.runCallCount = 0;
   }
 
-  public void echo() {
-    this.echoCallCount++;
-  }
-
-  public static class Builder extends Echo.Builder {
-    public MockEcho build() {
-      return new MockEcho(this);
-    }
+  public void run(Thread thread) {
+    this.runCallCount++;
   }
 }
 
 class MockSocket extends Socket {
   public Connection connection;
+  public int acceptConnectionCallCount;
+  public Connection[] acceptConnectionReturnValues;
 
   MockSocket(Builder builder) {
     super(builder);
     this.connection = new Connection.Builder().build();
+    this.acceptConnectionCallCount = 0;
   }
 
   public Connection acceptConnection() {
-    return this.connection;
+    acceptConnectionCallCount++;
+    return acceptConnectionReturnValues[acceptConnectionCallCount - 1];
   }
 
   public static class Builder extends Socket.Builder {
@@ -65,10 +63,10 @@ public class ServerTest {
     }
 
     @Test
-    public void itHasADefaultEcho() {
+    public void itHadADefaultThreadRunner() {
       Server server = new Server.Builder(out).build();
 
-      assertThat(server.echo, instanceOf(Echo.class));
+      assertThat(server.threadRunner, instanceOf(ThreadRunner.class));
     }
 
     @Test
@@ -83,14 +81,14 @@ public class ServerTest {
     }
 
     @Test
-    public void theEchoCanBeSetThroughTheBuilder() {
-      Echo echo = new Echo.Builder().build();
+    public void theThreadRunnerCanBeSetThroughTheBuilder() {
+      ThreadRunner threadRunner = new ThreadRunner();
 
       Server server = new Server.Builder(out)
-              .setEcho(echo)
+              .setThreadRunner(threadRunner)
               .build();
 
-      assertEquals(echo, server.echo);
+      assertEquals(threadRunner, server.threadRunner);
     }
 
     @Test
@@ -104,17 +102,20 @@ public class ServerTest {
   public static class StartMethodTests {
     private Server server;
     private Socket socket;
-    private Echo echo;
+    private ThreadRunner threadRunner;
 
     @Before
     public void setUp() {
       socket = new MockSocket.Builder().build();
-      echo = new MockEcho.Builder().build();
+      threadRunner = new MockThreadRunner();
 
       server = new Server.Builder(out)
               .setSocket(socket)
-              .setEcho(echo)
+              .setThreadRunner(threadRunner)
               .build();
+
+      Connection socketConnection = ((MockSocket) socket).connection;
+      allowAcceptConnectionToReturn(socket, new Connection[] {socketConnection, null});
     }
 
     @After
@@ -135,24 +136,52 @@ public class ServerTest {
 
       assertThat(bytes.toString(), containsString("Connection accepted"));
     }
+  }
 
+  public static class ThreadTests {
     @Test
-    public void itSetsTheEchosReaderAndWriterConnectionsToTheSocketsAcceptedConnection() {
+    public void itStartsTheThread() {
+      Socket socket = new MockSocket.Builder().build();
+      ThreadRunner threadRunner = new MockThreadRunner();
+
+      Server server = new Server.Builder(out)
+              .setSocket(socket)
+              .setThreadRunner(threadRunner)
+              .build();
+
+      Connection newConnection = new Connection.Builder().build();
+      allowAcceptConnectionToReturn(socket, new Connection[] {newConnection, null});
+
       server.start(0);
 
-      assertEquals(((MockSocket) socket).connection, echo.reader.connection);
-      assertEquals(((MockSocket) socket).connection, echo.writer.connection);
+      expectRunToBeCalledNTimes(threadRunner, 1);
     }
 
     @Test
-    public void itCallsEchoOnce() {
+    public void itStartsTheThreadEveryTimeAConnectionIsAccepted() {
+      Socket socket = new MockSocket.Builder().build();
+      ThreadRunner threadRunner = new MockThreadRunner();
+
+      Server server = new Server.Builder(out)
+              .setSocket(socket)
+              .setThreadRunner(threadRunner)
+              .build();
+
+      Connection firstNewConnection = new Connection.Builder().build();
+      Connection secondNewConnection = new Connection.Builder().build();
+      allowAcceptConnectionToReturn(socket, new Connection[] {firstNewConnection, secondNewConnection, null});
+
       server.start(0);
 
-      expectEchoToBeCalledOnce();
+      expectRunToBeCalledNTimes(threadRunner, 2);
     }
+  }
 
-    public void expectEchoToBeCalledOnce() {
-      assertEquals(1, ((MockEcho) echo).echoCallCount);
-    }
+  public static void allowAcceptConnectionToReturn(Socket socket, Connection[] returnValues) {
+    ((MockSocket) socket).acceptConnectionReturnValues = returnValues;
+  }
+
+  public static void expectRunToBeCalledNTimes(ThreadRunner threadRunner, int times) {
+    assertEquals(times, ((MockThreadRunner) threadRunner).runCallCount);
   }
 }
