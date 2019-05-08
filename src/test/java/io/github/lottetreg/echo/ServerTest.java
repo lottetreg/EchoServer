@@ -11,6 +11,7 @@ import java.io.PrintStream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 class MockReader extends Reader {
@@ -52,13 +53,46 @@ public class ServerTest {
 
   public static class SetUpTests {
     @Test
-    public void testItCreatesANewSocket () {
-      assertThat(new Server(out).socket, instanceOf(Socket.class));
+    public void itHasADefaultSocket() {
+      Server server = new Server.Builder(out).build();
+
+      assertThat(server.socket, instanceOf(Socket.class));
     }
 
     @Test
-    public void testItCreatesANewConnection () {
-      assertThat(new Server(out).connection, instanceOf(Connection.class));
+    public void theSocketCanBeSetThroughTheBuilder() {
+      Socket socket = new Socket.Builder().build();
+
+      Server server = new Server.Builder(out)
+              .setSocket(socket)
+              .build();
+
+      assertEquals(server.socket, socket);
+    }
+
+    @Test
+    public void itHasADefaultReader() {
+      Server server = new Server.Builder(out).build();
+
+      assertThat(server.reader, instanceOf(Reader.class));
+    }
+
+    @Test
+    public void theReaderCanBeSetThroughTheBuilder() {
+      Reader reader = new Reader.Builder().build();
+
+      Server server = new Server.Builder(out)
+              .setReader(reader)
+              .build();
+
+      assertEquals(server.reader, reader);
+    }
+
+    @Test
+    public void theOutIsSetThroughTheBuilder() {
+      Server server = new Server.Builder(out).build();
+
+      assertEquals(server.out, out);
     }
   }
 
@@ -70,9 +104,10 @@ public class ServerTest {
       Socket socket = new MockSocket.Builder().build();
       Reader reader = new MockReader.Builder().build();
 
-      server = new Server(out);
-      server.setSocket(socket);
-      server.setReader(reader);
+      server = new Server.Builder(out)
+              .setSocket(socket)
+              .setReader(reader)
+              .build();
     }
 
     @After
