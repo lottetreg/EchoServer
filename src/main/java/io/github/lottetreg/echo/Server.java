@@ -3,29 +3,29 @@ package io.github.lottetreg.echo;
 public class Server {
   public Output out;
   public Socket socket;
-  public ThreadRunner threadRunner;
+  public Echo echo;
 
   Server(Builder builder) {
     this.out = builder.out;
     this.socket = builder.socket;
-    this.threadRunner = builder.threadRunner;
+    this.echo = builder.echo;
   }
 
   public void start(int portNumber) {
     this.socket.setPort(portNumber);
     this.out.println("Waiting for connection");
 
-    Connection connection;
-    while((connection = socket.acceptConnection()) != null) {
-      out.println("Connection accepted");
-      this.threadRunner.run(new ConnectionThread(connection));
-    }
+    Connection connection = this.socket.acceptConnection();
+    this.out.println("Connection accepted");
+
+    this.echo.setConnection(connection);
+    this.echo.echo();
   }
 
   public static class Builder {
     public Output out;
     private Socket socket = new Socket.Builder().build();
-    private ThreadRunner threadRunner = new ThreadRunner();
+    private Echo echo = new Echo.Builder().build();
 
     Builder(Output out) {
       this.out = out;
@@ -36,8 +36,8 @@ public class Server {
       return this;
     }
 
-    public Builder setThreadRunner(ThreadRunner threadRunner) {
-      this.threadRunner = threadRunner;
+    public Builder setEcho(Echo echo) {
+      this.echo = echo;
       return this;
     }
 
