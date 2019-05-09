@@ -10,6 +10,18 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketAddress;
 
+class InvalidSocket extends Socket {
+  InvalidSocket(Builder builder) {
+    super(builder);
+  }
+
+  public static class InvalidBuilder extends Socket.Builder {
+    public ServerSocket newServerSocket() throws IOException {
+      throw new IOException();
+    }
+  }
+}
+
 public class SocketTest {
   private boolean calledAccept;
 
@@ -23,6 +35,15 @@ public class SocketTest {
     public java.net.Socket accept() {
       SocketTest.this.calledAccept = true;
       return this.socket;
+    }
+  }
+
+  @Test
+  public void itThrowsAnExceptionIfItFailsToCreateABuilder() {
+    try {
+      new InvalidSocket.InvalidBuilder();
+    } catch (RuntimeException e) {
+      assertEquals("Failed to create new Socket.Builder()", e.getMessage());
     }
   }
 

@@ -43,10 +43,14 @@ public class Socket {
 
     Builder() {
       try {
-        this.serverSocket = new ServerSocket();
-      } catch (IOException e) {
-        System.out.println(e);
+        this.serverSocket = newServerSocket();
+      } catch (Exception e) {
+        throw new NewSocketBuilderFailedException(e);
       }
+    }
+
+    public ServerSocket newServerSocket() throws IOException {
+      return new ServerSocket();
     }
 
     public Builder setServerSocket(ServerSocket serverSocket) {
@@ -56,6 +60,12 @@ public class Socket {
 
     public Socket build() {
       return new Socket(this);
+    }
+
+    class NewSocketBuilderFailedException extends RuntimeException {
+      NewSocketBuilderFailedException(Throwable cause) {
+        super("Failed to create new Socket.Builder()", cause);
+      }
     }
   }
 
