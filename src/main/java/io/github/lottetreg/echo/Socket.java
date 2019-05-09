@@ -33,8 +33,8 @@ public class Socket {
   public void close() {
     try {
       this.serverSocket.close();
-    } catch (IOException e) {
-      System.out.println(e);
+    } catch (Exception e) {
+      throw new FailedToCloseSocketException(e);
     }
   }
 
@@ -59,15 +59,21 @@ public class Socket {
     }
   }
 
-  public class FailedToBindSocketException extends RuntimeException {
+  class FailedToBindSocketException extends RuntimeException {
     FailedToBindSocketException(int portNumber, Throwable cause) {
       super("Failed to bind socket to port " + portNumber, cause);
     }
   }
 
-  public class FailedToAcceptConnectionException extends RuntimeException {
+  class FailedToAcceptConnectionException extends RuntimeException {
     FailedToAcceptConnectionException(Throwable cause) {
       super("Socket failed to accept connection", cause);
+    }
+  }
+
+  class FailedToCloseSocketException extends RuntimeException {
+    FailedToCloseSocketException(Throwable cause) {
+      super("Failed to close socket", cause);
     }
   }
 }

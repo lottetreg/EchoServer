@@ -139,4 +139,26 @@ public class SocketTest {
 
     assertEquals(true, socket.serverSocket.isClosed());
   }
+
+  @Test
+  public void closeThrowsExceptionIfItCannotCloseTheSocket() throws IOException {
+    class UnclosableServerSocket extends ServerSocket {
+      UnclosableServerSocket() throws IOException {}
+
+      public void close() throws IOException {
+        throw new IOException();
+      }
+    }
+
+    UnclosableServerSocket unclosableServerSocket = new UnclosableServerSocket();
+    Socket socket = new Socket.Builder()
+            .setServerSocket(unclosableServerSocket)
+            .build();
+
+    try {
+      socket.close();
+    } catch (RuntimeException e) {
+      assertEquals("Failed to close socket", e.getMessage());
+    }
+  }
 }
