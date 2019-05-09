@@ -94,6 +94,28 @@ public class SocketTest {
   }
 
   @Test
+  public void acceptConnectionThrowsExceptionIfTheSocketCannotAccept() throws IOException {
+    class UnacceptableServerSocket extends ServerSocket {
+      UnacceptableServerSocket() throws IOException {}
+
+      public java.net.Socket accept() throws IOException {
+        throw new IOException();
+      }
+    }
+
+    UnacceptableServerSocket unacceptableServerSocket = new UnacceptableServerSocket();
+    Socket socket = new Socket.Builder()
+            .setServerSocket(unacceptableServerSocket)
+            .build();
+
+    try {
+      socket.acceptConnection();
+    } catch (RuntimeException e) {
+      assertEquals("Socket failed to accept connection", e.getMessage());
+    }
+  }
+
+  @Test
   public void testAcceptConnectionSetsTheSocketOnTheConnection() throws IOException {
     MockServerSocket mockServerSocket = new MockServerSocket();
     Socket socket = new Socket.Builder()

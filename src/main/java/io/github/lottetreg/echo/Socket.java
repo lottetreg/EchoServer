@@ -25,9 +25,8 @@ public class Socket {
     try {
       java.net.Socket socket = this.serverSocket.accept();
       return new Connection.Builder().setSocket(socket).build();
-    } catch (IOException e) {
-      System.out.println(e);
-      return null;
+    } catch (Exception e) {
+      throw new FailedToAcceptConnectionException(e);
     }
   }
 
@@ -63,6 +62,12 @@ public class Socket {
   public class FailedToBindSocketException extends RuntimeException {
     FailedToBindSocketException(int portNumber, Throwable cause) {
       super("Failed to bind socket to port " + portNumber, cause);
+    }
+  }
+
+  public class FailedToAcceptConnectionException extends RuntimeException {
+    FailedToAcceptConnectionException(Throwable cause) {
+      super("Socket failed to accept connection", cause);
     }
   }
 }
