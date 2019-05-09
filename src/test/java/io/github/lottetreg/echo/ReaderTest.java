@@ -9,23 +9,6 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-class MockConnection extends Connection {
-  MockConnection(Builder builder) {
-    super(builder);
-  }
-
-  public InputStream getInputStream() {
-    byte[] byteArray = "Some string".getBytes();
-    return new ByteArrayInputStream(byteArray);
-  }
-
-  public static class Builder extends Connection.Builder {
-    public MockConnection build() {
-      return new MockConnection(this);
-    }
-  }
-}
-
 public class ReaderTest {
   @Test
   public void itHasADefaultConnection() {
@@ -57,7 +40,11 @@ public class ReaderTest {
 
   @Test
   public void testReadLine() {
-    Connection connection = new MockConnection.Builder().build();
+    byte[] byteArray = "Some string".getBytes();
+    InputStream inputStream = new ByteArrayInputStream(byteArray);
+    Connection connection = new MockConnection.Builder()
+            .setInputStream(inputStream)
+            .build();
     Reader reader = new Reader.Builder()
             .setConnection(connection)
             .build();

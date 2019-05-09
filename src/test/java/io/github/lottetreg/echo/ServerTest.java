@@ -14,16 +14,44 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+class MockWriter extends Writer {
+  public boolean calledPrintln;
+  public String outputArg;
+
+  MockWriter(Builder builder) { super(builder); }
+
+  public void println(String output) {
+    this.calledPrintln = true;
+    this.outputArg = output;
+  }
+
+  public static class Builder extends Writer.Builder {
+    public MockWriter build() {
+      return new MockWriter(this);
+    }
+  }
+}
+
 class MockReader extends Reader {
+  private String inputString;
+
   MockReader(Builder builder) {
     super(builder);
+    this.inputString = builder.inputString;
   }
 
   public String readLine() {
-    return "Some string";
+    return this.inputString;
   }
 
   public static class Builder extends Reader.Builder {
+    private String inputString;
+
+    public Builder setInputString(String inputString) {
+      this.inputString = inputString;
+      return this;
+    }
+
     public MockReader build() {
       return new MockReader(this);
     }
@@ -89,6 +117,24 @@ public class ServerTest {
     }
 
     @Test
+    public void itHasADefaultWriter() {
+      Server server = new Server.Builder(out).build();
+
+      assertThat(server.writer, instanceOf(Writer.class));
+    }
+
+    @Test
+    public void theWriterCanBeSetThroughTheBuilder() {
+      Writer writer = new Writer.Builder().build();
+
+      Server server = new Server.Builder(out)
+              .setWriter(writer)
+              .build();
+
+      assertEquals(server.writer, writer);
+    }
+
+    @Test
     public void theOutIsSetThroughTheBuilder() {
       Server server = new Server.Builder(out).build();
 
@@ -103,10 +149,12 @@ public class ServerTest {
     public void setUp() {
       Socket socket = new MockSocket.Builder().build();
       Reader reader = new MockReader.Builder().build();
+      Writer writer = new MockWriter.Builder().build();
 
       server = new Server.Builder(out)
               .setSocket(socket)
               .setReader(reader)
+              .setWriter(writer)
               .build();
     }
 
@@ -128,12 +176,27 @@ public class ServerTest {
 
       assertThat(bytes.toString(), containsString("Connection accepted"));
     }
+  }
 
+  public static class WritesToTheConnectionTests {
     @Test
-    public void testWritesDataFromConnection() {
-      server.start(9000);
+    public void itWritesTheInputBackToTheConnectionsOutputStream() {
+      Socket socket = new MockSocket.Builder().build();
+      Reader reader = new MockReader.Builder()
+              .setInputString("Some string")
+              .build();
+      Writer writer = new MockWriter.Builder().build();
 
-      assertThat(bytes.toString(), containsString("Some string"));
+      Server server = new Server.Builder(out)
+              .setSocket(socket)
+              .setReader(reader)
+              .setWriter(writer)
+              .build();
+
+      server.start(0);
+
+      assertEquals(true, ((MockWriter) writer).calledPrintln);
+      assertEquals("Some string", ((MockWriter) writer).outputArg);
     }
   }
 }

@@ -2,6 +2,7 @@ package io.github.lottetreg.echo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 
 public class Connection {
@@ -14,6 +15,15 @@ public class Connection {
   public InputStream getInputStream() {
     try {
       return socket.getInputStream();
+    } catch(IOException e) {
+      System.out.println(e);
+      return null;
+    }
+  }
+
+  public OutputStream getOutputStream() {
+    try {
+      return socket.getOutputStream();
     } catch(IOException e) {
       System.out.println(e);
       return null;
