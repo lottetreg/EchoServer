@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.SocketAddress;
 
 public class SocketTest {
   private boolean calledAccept;
@@ -53,6 +54,28 @@ public class SocketTest {
     assertEquals(9000, socket.serverSocket.getLocalPort());
 
     socket.close();
+  }
+
+  @Test
+  public void setPortThrowsAnExceptionIfItCannotBindTheSocket() throws IOException {
+    class UnbindableServerSocket extends ServerSocket {
+      UnbindableServerSocket() throws IOException {}
+
+      public void bind(SocketAddress endpoint) throws IOException {
+        throw new IOException();
+      }
+    }
+
+    UnbindableServerSocket unbindableServerSocket = new UnbindableServerSocket();
+    Socket socket = new Socket.Builder()
+            .setServerSocket(unbindableServerSocket)
+            .build();
+
+    try {
+      socket.setPort(9000);
+    } catch (RuntimeException e) {
+      assertEquals("Failed to bind socket to port 9000", e.getMessage());
+    }
   }
 
   @Test

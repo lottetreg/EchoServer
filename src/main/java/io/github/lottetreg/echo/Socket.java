@@ -12,12 +12,12 @@ public class Socket {
   }
 
   public void setPort(int portNumber) {
-    String hostname = "127.0.0.1";
-    InetSocketAddress socketAddress = new InetSocketAddress(hostname, portNumber);
     try {
+      String hostname = "127.0.0.1";
+      InetSocketAddress socketAddress = new InetSocketAddress(hostname, portNumber);
       this.serverSocket.bind(socketAddress);
-    } catch (IOException e) {
-      System.out.println(e);
+    } catch (Exception e) {
+      throw new FailedToBindSocketException(portNumber, e);
     }
   }
 
@@ -57,6 +57,12 @@ public class Socket {
 
     public Socket build() {
       return new Socket(this);
+    }
+  }
+
+  public class FailedToBindSocketException extends RuntimeException {
+    FailedToBindSocketException(int portNumber, Throwable cause) {
+      super("Failed to bind socket to port " + portNumber, cause);
     }
   }
 }
