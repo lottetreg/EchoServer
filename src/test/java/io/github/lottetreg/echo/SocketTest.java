@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -38,13 +40,15 @@ public class SocketTest {
     }
   }
 
+  @Rule
+  public ExpectedException exceptionRule = ExpectedException.none();
+
   @Test
   public void itThrowsAnExceptionIfItFailsToCreateABuilder() {
-    try {
-      new InvalidSocket.InvalidBuilder();
-    } catch (RuntimeException e) {
-      assertEquals("Failed to create new Socket.Builder()", e.getMessage());
-    }
+    exceptionRule.expect(Socket.Builder.NewSocketBuilderFailedException.class);
+    exceptionRule.expectMessage("Failed to create new Socket.Builder()");
+
+    new InvalidSocket.InvalidBuilder();
   }
 
   @Test
@@ -92,11 +96,10 @@ public class SocketTest {
             .setServerSocket(unbindableServerSocket)
             .build();
 
-    try {
-      socket.setPort(9000);
-    } catch (RuntimeException e) {
-      assertEquals("Failed to bind socket to port 9000", e.getMessage());
-    }
+    exceptionRule.expect(Socket.FailedToBindSocketException.class);
+    exceptionRule.expectMessage("Failed to bind socket to port 9000");
+
+    socket.setPort(9000);
   }
 
   @Test
@@ -129,11 +132,10 @@ public class SocketTest {
             .setServerSocket(unacceptableServerSocket)
             .build();
 
-    try {
-      socket.acceptConnection();
-    } catch (RuntimeException e) {
-      assertEquals("Socket failed to accept connection", e.getMessage());
-    }
+    exceptionRule.expect(Socket.FailedToAcceptConnectionException.class);
+    exceptionRule.expectMessage("Socket failed to accept connection");
+
+    socket.acceptConnection();
   }
 
   @Test
@@ -176,10 +178,9 @@ public class SocketTest {
             .setServerSocket(unclosableServerSocket)
             .build();
 
-    try {
-      socket.close();
-    } catch (RuntimeException e) {
-      assertEquals("Failed to close socket", e.getMessage());
-    }
+    exceptionRule.expect(Socket.FailedToCloseSocketException.class);
+    exceptionRule.expectMessage("Failed to close socket");
+
+    socket.close();
   }
 }
