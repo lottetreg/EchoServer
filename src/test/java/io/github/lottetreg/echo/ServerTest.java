@@ -18,43 +18,15 @@ class MockWriter extends Writer {
   public boolean calledPrintln;
   public String outputArg;
 
-  MockWriter(Builder builder) { super(builder); }
-
   public void println(String output) {
     this.calledPrintln = true;
     this.outputArg = output;
   }
-
-  public static class Builder extends Writer.Builder {
-    public MockWriter build() {
-      return new MockWriter(this);
-    }
-  }
 }
 
 class MockReader extends Reader {
-  private String inputString;
-
-  MockReader(Builder builder) {
-    super(builder);
-    this.inputString = builder.inputString;
-  }
-
   public String readLine() {
-    return this.inputString;
-  }
-
-  public static class Builder extends Reader.Builder {
-    private String inputString;
-
-    public Builder setInputString(String inputString) {
-      this.inputString = inputString;
-      return this;
-    }
-
-    public MockReader build() {
-      return new MockReader(this);
-    }
+    return "Some string";
   }
 }
 
@@ -107,7 +79,7 @@ public class ServerTest {
 
     @Test
     public void theReaderCanBeSetThroughTheBuilder() {
-      Reader reader = new Reader.Builder().build();
+      Reader reader = new Reader();
 
       Server server = new Server.Builder(out)
               .setReader(reader)
@@ -125,7 +97,7 @@ public class ServerTest {
 
     @Test
     public void theWriterCanBeSetThroughTheBuilder() {
-      Writer writer = new Writer.Builder().build();
+      Writer writer = new Writer();
 
       Server server = new Server.Builder(out)
               .setWriter(writer)
@@ -148,8 +120,8 @@ public class ServerTest {
     @Before
     public void setUp() {
       Socket socket = new MockSocket.Builder().build();
-      Reader reader = new MockReader.Builder().build();
-      Writer writer = new MockWriter.Builder().build();
+      Reader reader = new MockReader();
+      Writer writer = new MockWriter();
 
       server = new Server.Builder(out)
               .setSocket(socket)
@@ -182,10 +154,8 @@ public class ServerTest {
     @Test
     public void itWritesTheInputBackToTheConnectionsOutputStream() {
       Socket socket = new MockSocket.Builder().build();
-      Reader reader = new MockReader.Builder()
-              .setInputString("Some string")
-              .build();
-      Writer writer = new MockWriter.Builder().build();
+      Reader reader = new MockReader();
+      Writer writer = new MockWriter();
 
       Server server = new Server.Builder(out)
               .setSocket(socket)
