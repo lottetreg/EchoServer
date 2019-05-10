@@ -38,7 +38,7 @@ public class EchoServerTest {
       EchoServer.main(args);
     }
   }
-  
+
   public void sendMessageToServer(Socket socket, String message) throws IOException {
     PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
     printWriter.println(message);
