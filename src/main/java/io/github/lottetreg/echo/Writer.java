@@ -15,4 +15,8 @@ public class Writer {
   public void setConnection(Connection connection) {
     this.connection = connection;
   }
+
+  public void closeConnection() {
+    this.connection.close();
+  }
 }

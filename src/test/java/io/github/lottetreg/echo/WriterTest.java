@@ -31,4 +31,15 @@ public class WriterTest {
 
     assertEquals("Some other string\n", outputStream.toString());
   }
+
+  @Test
+  public void testCloseConnection() {
+    Connection connection = new Connection.Builder().build();
+    Writer writer = new Writer();
+    writer.setConnection(connection);
+
+    writer.closeConnection();
+
+    assertEquals(connection.socket.isClosed(), true);
+  }
 }

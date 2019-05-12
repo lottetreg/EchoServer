@@ -1,8 +1,11 @@
 package io.github.lottetreg.echo;
 
 import junit.framework.AssertionFailedError;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -102,7 +105,7 @@ public class EchoTest {
 
     echo.echo();
 
-    expectPrintlnToBeCalledNTimes(writer, 1);
+    expectPrintlnToBeCalledNTimes((MockWriter) writer, 1);
     expectPrintlnToReceive(writer, new String[] {"Some string"});
   }
 
@@ -120,8 +123,96 @@ public class EchoTest {
 
     echo.echo();
 
-    expectPrintlnToBeCalledNTimes(writer, 2);
+    expectPrintlnToBeCalledNTimes((MockWriter) writer, 2);
     expectPrintlnToReceive(writer, new String[] {"Some string", "Some other string"});
+  }
+
+  @Rule
+  public ExpectedException exceptionRule = ExpectedException.none();
+
+  @Test
+  public void itNotifiesTheClientAndClosesTheReadersConnectionIfItCannotReadIn() {
+    class UnreadableReader extends Reader {
+      public String readLine() {
+        throw new RuntimeException();
+      }
+    }
+
+    Reader unreadableReader = new UnreadableReader();
+    Writer writer = new MockWriter();
+
+    Echo echo = new Echo.Builder()
+            .setReader(unreadableReader)
+            .setWriter(writer)
+            .build();
+
+    echo.setConnection(new Connection.Builder().build());
+
+    try {
+      echo.echo();
+    } catch (Exception e) {
+    } finally {
+      expectPrintlnToReceive(writer, new String[] {"Could not read from this connection."});
+      assertEquals(unreadableReader.connection.socket.isClosed(), true);
+    }
+  }
+
+  @Test
+  public void itRethrowsAnExceptionWhenReadInFails() {
+    class UnreadableReader extends Reader {
+      public String readLine() {
+        throw new RuntimeException();
+      }
+    }
+
+    Echo echo = new Echo.Builder()
+            .setReader(new UnreadableReader())
+            .build();
+
+    exceptionRule.expect(RuntimeException.class);
+
+    echo.echo();
+  }
+
+  @Test
+  public void itClosesTheWritersConnectionIfItCannotPrintOut() {
+    class UnprintableWriter extends Writer {
+      public void println(String x) {
+        throw new RuntimeException();
+      }
+    }
+
+    Writer unprintableWriter = new UnprintableWriter();
+
+    Echo echo = new Echo.Builder()
+            .setWriter(unprintableWriter)
+            .build();
+
+    echo.setConnection(new Connection.Builder().build());
+
+    try {
+      echo.echo();
+    } catch (Exception e) {
+    } finally {
+      assertEquals(unprintableWriter.connection.socket.isClosed(), true);
+    }
+  }
+
+  @Test
+  public void itRethrowsAnExceptionWhenPrintOutFails() {
+    class UnprintableWriter extends Writer {
+      public void println(String x) {
+        throw new RuntimeException();
+      }
+    }
+
+    Echo echo = new Echo.Builder()
+            .setWriter(new UnprintableWriter())
+            .build();
+
+    exceptionRule.expect(RuntimeException.class);
+
+    echo.echo();
   }
 
   public void allowReadLineToReturn(Reader reader, String[] returnValues) {

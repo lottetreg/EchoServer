@@ -27,6 +27,10 @@ public class Reader {
     return new BufferedReader(streamReader);
   }
 
+  public void closeConnection() {
+    this.connection.close();
+  }
+
   class FailedToReadLineException extends RuntimeException {
     FailedToReadLineException(Throwable cause) {
       super("Failed to read from the buffered reader", cause);

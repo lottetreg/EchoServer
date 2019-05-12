@@ -101,4 +101,37 @@ public class ConnectionTest {
 
     connection.getOutputStream();
   }
+
+  @Test
+  public void testClose() {
+    Socket socket = new Socket();
+
+    Connection connection = new Connection.Builder()
+            .setSocket(socket)
+            .build();
+
+    connection.close();
+
+    assertEquals(socket.isClosed(), true);
+  }
+
+  @Test
+  public void closeRaisesExceptionIfItFails() {
+    class UnclosableSocket extends Socket {
+      public void close() throws IOException {
+        throw new IOException();
+      }
+    }
+
+    Socket unclosableSocket = new UnclosableSocket();
+
+    Connection connection = new Connection.Builder()
+            .setSocket(unclosableSocket)
+            .build();
+
+    exceptionRule.expect(Connection.FailedToCloseConnectionException.class);
+    exceptionRule.expectMessage("Failed to close the connection");
+
+    connection.close();
+  }
 }

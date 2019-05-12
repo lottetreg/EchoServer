@@ -78,4 +78,15 @@ public class ReaderTest {
 
     reader.readLine();
   }
+
+  @Test
+  public void testCloseConnection() {
+    Connection connection = new Connection.Builder().build();
+    Reader reader = new Reader();
+    reader.setConnection(connection);
+
+    reader.closeConnection();
+
+    assertEquals(connection.socket.isClosed(), true);
+  }
 }
