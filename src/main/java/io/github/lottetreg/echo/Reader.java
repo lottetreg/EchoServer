@@ -1,7 +1,6 @@
 package io.github.lottetreg.echo;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -15,15 +14,22 @@ public class Reader {
   public String readLine() {
     try {
       return newBufferedReader().readLine();
-    } catch (IOException e) {
-      System.out.println(e);
-      return null;
+    } catch(Connection.FailedToGetInputStreamException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new FailedToReadLineException(e);
     }
   }
 
-  private BufferedReader newBufferedReader() {
+  public BufferedReader newBufferedReader() {
     InputStream inputStream = this.connection.getInputStream();
     InputStreamReader streamReader = new InputStreamReader(inputStream);
     return new BufferedReader(streamReader);
+  }
+
+  class FailedToReadLineException extends RuntimeException {
+    FailedToReadLineException(Throwable cause) {
+      super("Failed to read from the buffered reader", cause);
+    }
   }
 }

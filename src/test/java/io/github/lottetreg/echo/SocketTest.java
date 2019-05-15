@@ -4,10 +4,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.SocketAddress;
+
+class InvalidSocket extends Socket {
+  InvalidSocket(Builder builder) {
+    super(builder);
+  }
+
+  public static class InvalidBuilder extends Socket.Builder {
+    public ServerSocket newServerSocket() throws IOException {
+      throw new IOException();
+    }
+  }
+}
 
 public class SocketTest {
   private boolean calledAccept;
@@ -23,6 +38,17 @@ public class SocketTest {
       SocketTest.this.calledAccept = true;
       return this.socket;
     }
+  }
+
+  @Rule
+  public ExpectedException exceptionRule = ExpectedException.none();
+
+  @Test
+  public void itThrowsAnExceptionIfItFailsToCreateABuilder() {
+    exceptionRule.expect(Socket.Builder.NewSocketBuilderFailedException.class);
+    exceptionRule.expectMessage("Failed to create new Socket.Builder()");
+
+    new InvalidSocket.InvalidBuilder();
   }
 
   @Test
@@ -56,6 +82,27 @@ public class SocketTest {
   }
 
   @Test
+  public void setPortThrowsAnExceptionIfItCannotBindTheSocket() throws IOException {
+    class UnbindableServerSocket extends ServerSocket {
+      UnbindableServerSocket() throws IOException {}
+
+      public void bind(SocketAddress endpoint) throws IOException {
+        throw new IOException();
+      }
+    }
+
+    UnbindableServerSocket unbindableServerSocket = new UnbindableServerSocket();
+    Socket socket = new Socket.Builder()
+            .setServerSocket(unbindableServerSocket)
+            .build();
+
+    exceptionRule.expect(Socket.FailedToBindSocketException.class);
+    exceptionRule.expectMessage("Failed to bind socket to port 9000");
+
+    socket.setPort(9000);
+  }
+
+  @Test
   public void testAcceptConnectionCallsAcceptOnTheServerSocket() throws IOException {
     Socket socket = new Socket.Builder()
             .setServerSocket(new MockServerSocket())
@@ -68,6 +115,27 @@ public class SocketTest {
     assertEquals(true, calledAccept);
 
     socket.close();
+  }
+
+  @Test
+  public void acceptConnectionThrowsExceptionIfTheSocketCannotAccept() throws IOException {
+    class UnacceptableServerSocket extends ServerSocket {
+      UnacceptableServerSocket() throws IOException {}
+
+      public java.net.Socket accept() throws IOException {
+        throw new IOException();
+      }
+    }
+
+    UnacceptableServerSocket unacceptableServerSocket = new UnacceptableServerSocket();
+    Socket socket = new Socket.Builder()
+            .setServerSocket(unacceptableServerSocket)
+            .build();
+
+    exceptionRule.expect(Socket.FailedToAcceptConnectionException.class);
+    exceptionRule.expectMessage("Socket failed to accept connection");
+
+    socket.acceptConnection();
   }
 
   @Test
@@ -93,5 +161,26 @@ public class SocketTest {
     socket.close();
 
     assertEquals(true, socket.serverSocket.isClosed());
+  }
+
+  @Test
+  public void closeThrowsExceptionIfItCannotCloseTheSocket() throws IOException {
+    class UnclosableServerSocket extends ServerSocket {
+      UnclosableServerSocket() throws IOException {}
+
+      public void close() throws IOException {
+        throw new IOException();
+      }
+    }
+
+    UnclosableServerSocket unclosableServerSocket = new UnclosableServerSocket();
+    Socket socket = new Socket.Builder()
+            .setServerSocket(unclosableServerSocket)
+            .build();
+
+    exceptionRule.expect(Socket.FailedToCloseSocketException.class);
+    exceptionRule.expectMessage("Failed to close socket");
+
+    socket.close();
   }
 }

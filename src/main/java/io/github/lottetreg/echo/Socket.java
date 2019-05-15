@@ -12,12 +12,12 @@ public class Socket {
   }
 
   public void setPort(int portNumber) {
-    String hostname = "127.0.0.1";
-    InetSocketAddress socketAddress = new InetSocketAddress(hostname, portNumber);
     try {
+      String hostname = "127.0.0.1";
+      InetSocketAddress socketAddress = new InetSocketAddress(hostname, portNumber);
       this.serverSocket.bind(socketAddress);
-    } catch (IOException e) {
-      System.out.println(e);
+    } catch (Exception e) {
+      throw new FailedToBindSocketException(portNumber, e);
     }
   }
 
@@ -25,17 +25,16 @@ public class Socket {
     try {
       java.net.Socket socket = this.serverSocket.accept();
       return new Connection.Builder().setSocket(socket).build();
-    } catch (IOException e) {
-      System.out.println(e);
-      return null;
+    } catch (Exception e) {
+      throw new FailedToAcceptConnectionException(e);
     }
   }
 
   public void close() {
     try {
       this.serverSocket.close();
-    } catch (IOException e) {
-      System.out.println(e);
+    } catch (Exception e) {
+      throw new FailedToCloseSocketException(e);
     }
   }
 
@@ -44,10 +43,14 @@ public class Socket {
 
     Builder() {
       try {
-        this.serverSocket = new ServerSocket();
-      } catch (IOException e) {
-        System.out.println(e);
+        this.serverSocket = newServerSocket();
+      } catch (Exception e) {
+        throw new NewSocketBuilderFailedException(e);
       }
+    }
+
+    public ServerSocket newServerSocket() throws IOException {
+      return new ServerSocket();
     }
 
     public Builder setServerSocket(ServerSocket serverSocket) {
@@ -57,6 +60,30 @@ public class Socket {
 
     public Socket build() {
       return new Socket(this);
+    }
+
+    class NewSocketBuilderFailedException extends RuntimeException {
+      NewSocketBuilderFailedException(Throwable cause) {
+        super("Failed to create new Socket.Builder()", cause);
+      }
+    }
+  }
+
+  class FailedToBindSocketException extends RuntimeException {
+    FailedToBindSocketException(int portNumber, Throwable cause) {
+      super("Failed to bind socket to port " + portNumber, cause);
+    }
+  }
+
+  class FailedToAcceptConnectionException extends RuntimeException {
+    FailedToAcceptConnectionException(Throwable cause) {
+      super("Socket failed to accept connection", cause);
+    }
+  }
+
+  class FailedToCloseSocketException extends RuntimeException {
+    FailedToCloseSocketException(Throwable cause) {
+      super("Failed to close socket", cause);
     }
   }
 }
