@@ -16,8 +16,27 @@ public class Echo {
 
   public void echo() {
     String input;
-    while((input = this.reader.readLine()) != null) {
-      this.writer.println(input);
+    while ((input = readIn()) != null) {
+      printOut(input);
+    }
+  }
+
+  private String readIn() {
+    try {
+      return this.reader.readLine();
+    } catch (Exception e) {
+      printOut("Could not read from this connection.");
+      this.reader.closeConnection();
+      throw e;
+    }
+  }
+
+  private void printOut(String output) {
+    try {
+      this.writer.println(output);
+    } catch (Exception e) {
+      this.writer.closeConnection();
+      throw e;
     }
   }
 

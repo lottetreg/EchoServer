@@ -14,7 +14,7 @@ public class Connection {
 
   public InputStream getInputStream() {
     try {
-      return socket.getInputStream();
+      return this.socket.getInputStream();
     } catch(Exception e) {
       throw new FailedToGetInputStreamException(e);
     }
@@ -22,9 +22,17 @@ public class Connection {
 
   public OutputStream getOutputStream() {
     try {
-      return socket.getOutputStream();
+      return this.socket.getOutputStream();
     } catch(IOException e) {
       throw new FailedToGetOutputStreamException(e);
+    }
+  }
+
+  public void close() {
+    try {
+      this.socket.close();
+    } catch (Exception e) {
+      throw new FailedToCloseConnectionException(e);
     }
   }
 
@@ -50,6 +58,12 @@ public class Connection {
   class FailedToGetOutputStreamException extends RuntimeException {
     FailedToGetOutputStreamException(Throwable cause) {
       super("Failed to get the socket's output stream", cause);
+    }
+  }
+
+  class FailedToCloseConnectionException extends RuntimeException {
+    FailedToCloseConnectionException(Throwable cause) {
+      super("Failed to close the connection", cause);
     }
   }
 }
